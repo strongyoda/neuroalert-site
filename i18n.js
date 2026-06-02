@@ -25,6 +25,12 @@ const I18N = {
     src_title:"Data Sources",
     src_us:"FDA openFDA — Recall & Event", src_kr:"MFDS — Medical Device Recall", src_jp:"PMDA — JAMDER Cases",
     ref_badge:"reference", src_more:"How signals are filtered →",
+    cov_title:"Data Coverage & Limits",
+    cov_us:"Recalls + adverse events, auto-updated.",
+    cov_kr:"Recall/withdrawal items only. No public adverse-event or detailed-reason data; product names are class-level.",
+    cov_jp:"Reference snapshot, updated periodically. Not in alerts. No manufacturer/product names (PMDA policy).",
+    cc_today:"Today",
+    cc_total:"Total visits",
     disclaimer:"<strong>Informational use only.</strong> Counts reflect voluntary post-market reports and do not indicate incidence, device risk, or manufacturer quality. This dashboard is not a substitute for regulatory notices or clinical judgment.",
     foot_brand:"Global neurovascular device safety surveillance, aggregated from public regulatory data.",
     foot_site:"Site", foot_legal:"Legal", foot_data:"Data",
@@ -63,6 +69,12 @@ const I18N = {
     src_title:"데이터 출처",
     src_us:"FDA openFDA — 리콜·이상사례", src_kr:"식약처 — 의료기기 회수", src_jp:"PMDA — JAMDER 증례",
     ref_badge:"참고용", src_more:"신호 필터링 방식 보기 →",
+    cov_title:"데이터 범위와 한계",
+    cov_us:"리콜 + 이상사례, 자동 업데이트.",
+    cov_kr:"회수·판매중지 품목만 제공. 공개 이상사례·상세 사유 없음. 품목명은 분류 수준.",
+    cov_jp:"참고용 스냅샷, 주기적 갱신. 알림 미포함. 제조사·제품명 비공개(PMDA 정책).",
+    cc_today:"오늘",
+    cc_total:"전체 방문",
     disclaimer:"<strong>정보 제공 목적입니다.</strong> 건수는 자발적 사후감시 보고를 반영하며, 발생률·기기 위험도·제조사 품질을 의미하지 않습니다. 본 대시보드는 규제 공지나 임상적 판단을 대체할 수 없습니다.",
     foot_brand:"공개 규제 데이터를 모은 글로벌 신경중재 의료기기 안전성 모니터입니다.",
     foot_site:"사이트", foot_legal:"법적 고지", foot_data:"데이터",
@@ -126,3 +138,42 @@ document.addEventListener("DOMContentLoaded", ()=>{
   });
   applyI18n();
 });
+
+// ============================================================
+// FDA product code + Korea class explanations (for tooltips)
+// ============================================================
+const CODE_INFO = {
+  en: {
+    "OUT": "Flow diverter — diverts blood flow away from an intracranial aneurysm",
+    "HCG": "Embolization coil — fills/occludes an aneurysm or vessel",
+    "KRD": "Embolization-promoting device (coil-related)",
+    "NRY": "Thrombus retriever catheter — removes clots in acute stroke",
+    "NIM": "Carotid artery stent",
+    "NJE": "Intracranial neurovascular stent",
+    "NTE": "Carotid embolic capture / protection device",
+    "MFE": "Injectable embolic agent (liquid embolic)",
+    "QCA": "Coil-assist (stent-assisted coiling) stent",
+    "POL": "Mechanical thrombectomy device (acute stroke)",
+    "DQY": "Percutaneous catheter (neurovascular brands only)"
+  },
+  ko: {
+    "OUT": "플로우 다이버터 — 두개내 동맥류에서 혈류를 우회시키는 기기",
+    "HCG": "색전 코일 — 동맥류나 혈관을 채워 막는 기기",
+    "KRD": "색전 촉진 기기 (코일 계열)",
+    "NRY": "혈전제거 카테터 — 급성 뇌졸중에서 혈전을 제거",
+    "NIM": "경동맥 스텐트",
+    "NJE": "두개내 신경혈관 스텐트",
+    "NTE": "경동맥 색전 포착/보호 기구",
+    "MFE": "주입형 색전물질 (액상 색전)",
+    "QCA": "코일 보조(스텐트 보조 코일링) 스텐트",
+    "POL": "기계적 혈전절제 기기 (급성 뇌졸중)",
+    "DQY": "경피적 카테터 (신경중재 브랜드만 포함)"
+  }
+};
+function codeInfo(code){
+  if(!code) return "";
+  const lang = (typeof LANG !== "undefined") ? LANG : "en";
+  return (CODE_INFO[lang] && CODE_INFO[lang][code])
+      || (CODE_INFO.en[code])
+      || (lang==="ko" ? "한국 의료기기 분류코드" : "Device classification code");
+}

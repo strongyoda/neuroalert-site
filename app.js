@@ -83,7 +83,7 @@ function render(){
     tr.innerHTML =
       '<td class="col-src"><span class="src-flag '+src+'">'+(e.source||"—")+'</span></td>'+
       '<td class="col-dev"><div class="dev-name">'+(esc(e.device_name)||"—")+'</div></td>'+
-      '<td class="col-code">'+(e.category?'<span class="code-badge">'+esc(e.category)+'</span>':"—")+'</td>'+
+      '<td class="col-code">'+(e.category?'<span class="code-badge" data-tip="'+esc(codeInfo(e.category))+'">'+esc(e.category)+'</span>':"—")+'</td>'+
       '<td class="col-reason"><div class="reason-text">'+(esc(e.reason)||"—")+'</div></td>'+
       '<td class="col-date"><span class="date-cell">'+fmtDate(e.event_date)+'</span></td>';
     frag.appendChild(tr);
@@ -162,3 +162,28 @@ document.getElementById("dateClear").addEventListener("click",()=>{
 });
 
 loadEvents();
+
+// ============================================================
+// Visitor counter — privacy-friendly (counts only, no personal data)
+// Uses a free hit counter API; fails silently if unreachable.
+// ============================================================
+async function loadCounter(){
+  const elT = document.getElementById("ccTotal");
+  const elD = document.getElementById("ccToday");
+  if(!elT) return;
+  const NS = "neuroalert_live";
+  try{
+    // total visits (increment once per page load)
+    const tot = await fetch(`https://api.countapi.xyz/hit/${NS}/total`).then(r=>r.json());
+    if(tot && typeof tot.value === "number") elT.textContent = tot.value.toLocaleString();
+    // today's visits (key by date, increments)
+    const day = new Date().toISOString().slice(0,10).replace(/-/g,"");
+    const tod = await fetch(`https://api.countapi.xyz/hit/${NS}/d${day}`).then(r=>r.json());
+    if(tod && typeof tod.value === "number") elD.textContent = tod.value.toLocaleString();
+  }catch(e){
+    // counter is non-critical; hide if it fails
+    const card = document.querySelector(".counter-card");
+    if(card) card.style.display = "none";
+  }
+}
+loadCounter();

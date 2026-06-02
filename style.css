@@ -286,3 +286,32 @@ body.lang-ko .panel-head h2,body.lang-ko .card h3,body.lang-ko .doc h1,body.lang
 .col-reason{max-width:300px;width:300px}
 .table-scroll{overflow-x:auto}
 table.events{min-width:680px}
+
+/* ============ code badge tooltip ============ */
+.code-badge{position:relative;cursor:help;border-bottom:1px dotted var(--teal)}
+.code-badge[data-tip]:hover::after{
+  content:attr(data-tip);
+  position:absolute;left:0;top:calc(100% + 6px);z-index:60;
+  background:var(--ink);color:#f0ece3;
+  font-family:"IBM Plex Sans",sans-serif;font-size:12px;font-weight:400;
+  line-height:1.45;letter-spacing:0;text-transform:none;
+  padding:8px 11px;border-radius:6px;width:max-content;max-width:260px;
+  box-shadow:0 6px 20px rgba(22,32,46,.25);white-space:normal;
+  pointer-events:none;
+}
+.code-badge[data-tip]:hover::before{
+  content:"";position:absolute;left:10px;top:calc(100% + 1px);z-index:61;
+  border:5px solid transparent;border-bottom-color:var(--ink);
+}
+body.lang-ko .code-badge[data-tip]:hover::after{font-family:"IBM Plex Sans KR",sans-serif}
+
+/* ============ visitor counter (small, in sidebar) ============ */
+.counter-card{text-align:center;padding:14px 16px}
+.counter-card .cc-num{font-family:"Newsreader",serif;font-size:26px;font-weight:600;color:var(--navy);line-height:1}
+.counter-card .cc-lab{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--slate);margin-top:3px}
+.counter-card .cc-row{display:flex;justify-content:center;gap:24px;margin-top:4px}
+
+/* ============ coverage card ============ */
+.coverage .cov-list{list-style:none;display:flex;flex-direction:column;gap:10px}
+.coverage .cov-list li{display:flex;gap:9px;font-size:12px;color:var(--slate);line-height:1.5;align-items:flex-start}
+.coverage .cov-list .src-flag{flex:none;margin-top:1px}
