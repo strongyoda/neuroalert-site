@@ -173,24 +173,18 @@ document.getElementById("dateClear").addEventListener("click",()=>{
 loadEvents();
 
 // ============================================================
-// Visitor counter — privacy-friendly (counts only, no personal data)
-// Uses a free hit counter API; fails silently if unreachable.
+// Visitor counter — our own backend (privacy-friendly, counts only)
 // ============================================================
 async function loadCounter(){
   const elT = document.getElementById("ccTotal");
   const elD = document.getElementById("ccToday");
   if(!elT) return;
-  const NS = "neuroalert_live";
   try{
-    // total visits (increment once per page load)
-    const tot = await fetch(`https://api.countapi.xyz/hit/${NS}/total`).then(r=>r.json());
-    if(tot && typeof tot.value === "number") elT.textContent = tot.value.toLocaleString();
-    // today's visits (key by date, increments)
-    const day = new Date().toISOString().slice(0,10).replace(/-/g,"");
-    const tod = await fetch(`https://api.countapi.xyz/hit/${NS}/d${day}`).then(r=>r.json());
-    if(tod && typeof tod.value === "number") elD.textContent = tod.value.toLocaleString();
+    const res = await fetch(`${API_BASE}/api/visit`, {method:"POST"});
+    const data = await res.json();
+    if(typeof data.total === "number") elT.textContent = data.total.toLocaleString();
+    if(typeof data.today === "number") elD.textContent = data.today.toLocaleString();
   }catch(e){
-    // counter is non-critical; hide if it fails
     const card = document.querySelector(".counter-card");
     if(card) card.style.display = "none";
   }
