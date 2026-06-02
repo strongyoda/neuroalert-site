@@ -3,6 +3,7 @@
 // ============================================================
 let ALL_EVENTS = [];
 let CURRENT_SRC = "ALL";
+let CURRENT_TYPE = "ALL";
 let SEARCH_Q = "";
 let DATE_FROM = null, DATE_TO = null;
 
@@ -56,6 +57,7 @@ async function loadEvents(){
 function getFiltered(){
   return ALL_EVENTS.filter(e=>{
     if(CURRENT_SRC!=="ALL" && e.source!==CURRENT_SRC) return false;
+    if(CURRENT_TYPE!=="ALL" && (e.event_type||"recall")!==CURRENT_TYPE) return false;
     if(DATE_FROM && (!e._date || e._date < DATE_FROM)) return false;
     if(DATE_TO && (!e._date || e._date > DATE_TO)) return false;
     if(SEARCH_Q){
@@ -80,9 +82,11 @@ function render(){
   shown.forEach(e=>{
     const tr = document.createElement("tr");
     const src = (e.source||"").toLowerCase();
+    const et = (e.event_type||"recall");
+    const typeBadge = '<span class="type-badge '+et+'">'+t(et==="event"?"badge_event":"badge_recall")+'</span>';
     tr.innerHTML =
       '<td class="col-src"><span class="src-flag '+src+'">'+(e.source||"—")+'</span></td>'+
-      '<td class="col-dev"><div class="dev-name">'+(esc(e.device_name)||"—")+'</div></td>'+
+      '<td class="col-dev"><div class="dev-name">'+(esc(e.device_name)||"—")+'</div>'+typeBadge+'</td>'+
       '<td class="col-code">'+(e.category?'<span class="code-badge" data-tip="'+esc(codeInfo(e.category))+'">'+esc(e.category)+'</span>':"—")+'</td>'+
       '<td class="col-reason"><div class="reason-text">'+(esc(e.reason)||"—")+'</div></td>'+
       '<td class="col-date"><span class="date-cell">'+fmtDate(e.event_date)+'</span></td>';
@@ -142,6 +146,11 @@ document.getElementById("sourceFilter").addEventListener("click",(e)=>{
   const btn=e.target.closest(".chip"); if(!btn) return;
   document.querySelectorAll("#sourceFilter .chip").forEach(c=>c.classList.remove("active"));
   btn.classList.add("active"); CURRENT_SRC=btn.dataset.src; render();
+});
+document.getElementById("typeFilter").addEventListener("click",(e)=>{
+  const btn=e.target.closest(".chip"); if(!btn) return;
+  document.querySelectorAll("#typeFilter .chip").forEach(c=>c.classList.remove("active"));
+  btn.classList.add("active"); CURRENT_TYPE=btn.dataset.type; render();
 });
 let searchTimer;
 document.getElementById("searchInput").addEventListener("input",(e)=>{

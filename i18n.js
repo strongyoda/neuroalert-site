@@ -14,6 +14,8 @@ const I18N = {
     panel_desc:"Most recent regulatory actions matching the neurovascular device whitelist.",
     search_ph:"Search device, manufacturer, or reason…",
     filter_all:"All", btn_refresh:"Refresh",
+    type_all:"All", type_recall:"Recalls", type_event:"Adverse events",
+    badge_recall:"Recall", badge_event:"Adverse event",
     date_range:"Date range", date_clear:"Clear",
     th_source:"Source", th_device:"Device / Description", th_code:"Code", th_reason:"Reason", th_date:"Date",
     sub_title:"Email Alerts",
@@ -26,7 +28,7 @@ const I18N = {
     src_us:"FDA openFDA — Recall & Event", src_kr:"MFDS — Medical Device Recall", src_jp:"PMDA — JAMDER Cases",
     ref_badge:"reference", src_more:"How signals are filtered →",
     cov_title:"Data Coverage & Limits",
-    cov_us:"Recalls + adverse events, auto-updated.",
+    cov_us:"Recalls + adverse events. Adverse events show only the most recent reports per category.",
     cov_kr:"Recall/withdrawal items only. No public adverse-event or detailed-reason data; product names are class-level.",
     cov_jp:"Reference snapshot, updated periodically. Not in alerts. No manufacturer/product names (PMDA policy).",
     cc_today:"Today",
@@ -58,6 +60,8 @@ const I18N = {
     panel_desc:"신경중재 기기 화이트리스트에 해당하는 최근 규제 조치입니다.",
     search_ph:"기기명, 제조사, 사유로 검색…",
     filter_all:"전체", btn_refresh:"새로고침",
+    type_all:"전체", type_recall:"회수", type_event:"이상사례",
+    badge_recall:"회수", badge_event:"이상사례",
     date_range:"기간", date_clear:"초기화",
     th_source:"출처", th_device:"기기 / 설명", th_code:"코드", th_reason:"사유", th_date:"일자",
     sub_title:"이메일 알림",
@@ -70,7 +74,7 @@ const I18N = {
     src_us:"FDA openFDA — 리콜·이상사례", src_kr:"식약처 — 의료기기 회수", src_jp:"PMDA — JAMDER 증례",
     ref_badge:"참고용", src_more:"신호 필터링 방식 보기 →",
     cov_title:"데이터 범위와 한계",
-    cov_us:"리콜 + 이상사례, 자동 업데이트.",
+    cov_us:"리콜 + 이상사례. 이상사례는 분류별 최신 보고 일부만 표시합니다.",
     cov_kr:"회수·판매중지 품목만 제공. 공개 이상사례·상세 사유 없음. 품목명은 분류 수준.",
     cov_jp:"참고용 스냅샷, 주기적 갱신. 알림 미포함. 제조사·제품명 비공개(PMDA 정책).",
     cc_today:"오늘",
@@ -173,7 +177,10 @@ const CODE_INFO = {
 function codeInfo(code){
   if(!code) return "";
   const lang = (typeof LANG !== "undefined") ? LANG : "en";
-  return (CODE_INFO[lang] && CODE_INFO[lang][code])
-      || (CODE_INFO.en[code])
-      || (lang==="ko" ? "한국 의료기기 분류코드" : "Device classification code");
+  if(CODE_INFO[lang] && CODE_INFO[lang][code]) return CODE_INFO[lang][code];
+  if(CODE_INFO.en[code]) return CODE_INFO.en[code];
+  // 한국 품목분류코드 등 사전에 없는 코드
+  return (lang==="ko")
+    ? "한국 식약처 의료기기 품목분류코드 (품목명은 기기 설명 참고)"
+    : "Korea MFDS device class code (see device name for description)";
 }
