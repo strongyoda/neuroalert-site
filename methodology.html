@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Methodology — NeuroAlert</title>
+<meta name="description" content="How NeuroAlert collects and filters neurovascular device safety data.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+KR:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a href="index.html" class="brand">
+      <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true">
+        <rect x="1" y="1" width="30" height="30" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"/>
+        <path d="M8 20 L8 12 L13 12 M8 16 L12 16 M16 20 L16 12 L20 12 Q22 12 22 14.5 Q22 17 20 17 L16 17 M24 12 L24 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"/>
+      </svg>
+      <span class="brand-text">NeuroAlert<span class="brand-dot">.</span></span>
+    </a>
+    <nav class="topnav">
+      <a href="index.html" data-i18n="nav_dashboard">Dashboard</a>
+      <a href="about.html"  data-i18n="nav_about">About</a>
+      <a href="methodology.html" class="active" data-i18n="nav_method">Methodology</a>
+      <a href="contact.html"  data-i18n="nav_contact">Contact</a>
+    </nav>
+    <div class="topbar-right">
+      <div class="lang-toggle" id="langToggle">
+        <button data-lang="en" class="active">EN</button>
+        <button data-lang="ko">한</button>
+      </div>
+    </div>
+  </div>
+</header>
+<main class="doc">
+<div class="lang-en">
+<h1>Methodology</h1>
+<div class="doc-meta">How signals are collected, filtered, and presented</div>
+<p>This page explains, in plain terms, how the data on NeuroAlert is gathered and why certain records are included or excluded. Transparency about method is essential because post-market surveillance data is easily misinterpreted.</p>
+<h2>Data sources</h2>
+<ul>
+<li><strong>United States — FDA openFDA.</strong> Device Recall and Device Adverse Event (MAUDE) endpoints, queried by FDA product code. Updated automatically.</li>
+<li><strong>Korea — MFDS.</strong> Medical device recall and voluntary report datasets via the public data portal. Updated automatically.</li>
+<li><strong>Japan — PMDA.</strong> JAMDER medical device malfunction case information, retrieved by Japanese generic device name. <strong>Reference data, updated periodically and not included in email alerts</strong> (PMDA has no public API, so automated real-time collection is avoided).</li>
+</ul>
+<h2>Device whitelist (inclusion)</h2>
+<p>Rather than keyword matching — which pulls in unrelated products — NeuroAlert filters by regulatory product classification. The U.S. whitelist includes the following FDA product codes:</p>
+<ul>
+<li><strong>OUT</strong> — Intracranial aneurysm flow diverter</li>
+<li><strong>HCG</strong> — Neurovascular embolization device (coils)</li>
+<li><strong>KRD</strong> — Vascular device for promoting embolization</li>
+<li><strong>NRY</strong> — Thrombus retriever catheter</li>
+<li><strong>NIM</strong> — Carotid stent &nbsp;·&nbsp; <strong>NJE</strong> — Intracranial neurovascular stent</li>
+<li><strong>NTE</strong> — Carotid embolic capture &nbsp;·&nbsp; <strong>QCA</strong> — Coil-assist stent</li>
+<li><strong>MFE</strong> — Injectable embolic agent &nbsp;·&nbsp; <strong>POL</strong> — Mechanical thrombectomy device</li>
+<li><strong>DQY</strong> — Percutaneous catheter (limited to neurovascular brands only)</li>
+</ul>
+<h2>Exclusions</h2>
+<p>Codes that share keywords with neurovascular devices but are clinically unrelated are deliberately excluded — for example surgical staplers (GDW) and continuous-flush catheters (KRA). Japanese peripheral-vascular generic names and open-surgical aneurysm clips are likewise excluded.</p>
+<h2>Critical limitations</h2>
+<div class="callout">Post-market reports have <strong>no denominator</strong> (no procedure or sales volume). Counts therefore do <strong>not</strong> represent incidence rates, device risk, or manufacturer quality. A higher count often reflects wider use or better reporting, not a less safe device. These data are for signal awareness only.</div>
+<p>Reports may be duplicated across reporters, dates are sometimes missing or approximate, and a record's presence does not establish that a device caused harm. NeuroAlert presents records as-is from the source agencies and does not adjudicate causality.</p>
+</div>
+<div class="lang-ko" hidden>
+<h1>방법론</h1>
+<div class="doc-meta">신호를 수집·필터링·표시하는 방식</div>
+<p>이 페이지는 NeuroAlert의 데이터가 어떻게 수집되고 왜 특정 레코드가 포함·제외되는지를 쉽게 설명합니다. 사후감시 데이터는 잘못 해석되기 쉬우므로 방법의 투명성이 중요합니다.</p>
+<h2>데이터 출처</h2>
+<ul>
+<li><strong>미국 — FDA openFDA.</strong> 기기 리콜 및 이상사례(MAUDE) 엔드포인트를 FDA 제품코드로 조회. 자동 업데이트.</li>
+<li><strong>한국 — 식약처(MFDS).</strong> 공공데이터포털을 통한 의료기기 회수·자발적 보고 데이터셋. 자동 업데이트.</li>
+<li><strong>일본 — PMDA.</strong> 일본어 일반명으로 조회한 JAMDER 의료기기 불구합 증례 정보. <strong>참고용 데이터로, 주기적으로 갱신되며 이메일 알림에는 포함되지 않습니다</strong> (PMDA는 공식 API가 없어 자동 실시간 수집을 하지 않습니다).</li>
+</ul>
+<h2>기기 화이트리스트(포함 기준)</h2>
+<p>무관한 제품까지 딸려오는 키워드 매칭 대신, NeuroAlert는 규제 제품 분류 기준으로 필터링합니다. 미국 화이트리스트는 다음 FDA 제품코드를 포함합니다:</p>
+<ul>
+<li><strong>OUT</strong> — 두개내 동맥류 플로우 다이버터</li>
+<li><strong>HCG</strong> — 신경혈관 색전 기기(코일)</li>
+<li><strong>KRD</strong> — 색전 촉진용 혈관 기기</li>
+<li><strong>NRY</strong> — 혈전제거 카테터</li>
+<li><strong>NIM</strong> — 경동맥 스텐트 &nbsp;·&nbsp; <strong>NJE</strong> — 두개내 신경혈관 스텐트</li>
+<li><strong>NTE</strong> — 경동맥 색전 포착 장치 &nbsp;·&nbsp; <strong>QCA</strong> — 코일 보조 스텐트</li>
+<li><strong>MFE</strong> — 액상 색전물질 &nbsp;·&nbsp; <strong>POL</strong> — 기계적 혈전절제 기기</li>
+<li><strong>DQY</strong> — 경피적 카테터(신경혈관 브랜드로만 한정)</li>
+</ul>
+<h2>제외 기준</h2>
+<p>신경혈관 기기와 키워드는 같지만 임상적으로 무관한 코드는 의도적으로 제외합니다 — 예를 들어 외과용 스테이플러(GDW), 연속 플러시 카테터(KRA) 등입니다. 일본의 말초혈관용 일반명과 개두술용 동맥류 클립도 마찬가지로 제외합니다.</p>
+<h2>중요한 한계</h2>
+<div class="callout">사후감시 보고는 <strong>분모(시술 건수·판매량)가 없습니다.</strong> 따라서 건수는 발생률·기기 위험도·제조사 품질을 <strong>의미하지 않습니다.</strong> 건수가 많은 것은 더 널리 쓰이거나 보고가 철저하다는 뜻일 때가 많으며, 더 위험한 기기라는 의미가 아닙니다. 이 데이터는 신호 인지 목적입니다.</div>
+<p>보고는 여러 보고자에 의해 중복될 수 있고, 일자가 누락되거나 근사치일 수 있으며, 레코드가 존재한다고 해서 기기가 해를 일으켰다는 근거가 되지는 않습니다. NeuroAlert는 출처 기관의 레코드를 있는 그대로 표시하며 인과관계를 판단하지 않습니다.</p>
+</div></main>
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <span class="brand-text">NeuroAlert<span class="brand-dot">.</span></span>
+      <p data-i18n="foot_brand">Global neurovascular device safety surveillance, aggregated from public regulatory data.</p>
+    </div>
+    <div class="footer-cols">
+      <div class="fcol"><span class="fcol-h" data-i18n="foot_site">Site</span>
+        <a href="index.html" data-i18n="nav_dashboard">Dashboard</a><a href="about.html" data-i18n="nav_about">About</a><a href="methodology.html" data-i18n="nav_method">Methodology</a></div>
+      <div class="fcol"><span class="fcol-h" data-i18n="foot_legal">Legal</span>
+        <a href="privacy.html" data-i18n="foot_privacy">Privacy Policy</a><a href="disclaimer.html" data-i18n="foot_disclaimer">Disclaimer</a><a href="contact.html" data-i18n="nav_contact">Contact</a></div>
+      <div class="fcol"><span class="fcol-h" data-i18n="foot_data">Data</span>
+        <a href="https://open.fda.gov" target="_blank" rel="noopener">openFDA</a>
+        <a href="https://www.mfds.go.kr" target="_blank" rel="noopener">MFDS</a>
+        <a href="https://www.pmda.go.jp" target="_blank" rel="noopener">PMDA</a></div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span data-i18n="foot_copy">© 2026 NeuroAlert. Data belongs to respective regulatory agencies.</span>
+    <span data-i18n="foot_tag">Built for clinical awareness, not clinical decisions.</span>
+  </div>
+</footer>
+<script src="i18n.js"></script>
+</body></html>
