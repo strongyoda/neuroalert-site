@@ -228,13 +228,26 @@ table.events{width:100%;border-collapse:collapse;font-size:13.5px}
   .sidebar{position:static;flex-direction:column}
   .ad-side{min-height:120px}
 }
-@media (max-width:620px){
+@media (max-width:680px){
   .topnav{display:none}
-  .hero-meta{gap:28px}
+  .hero-meta{gap:28px;flex-wrap:wrap}
   .hero h1 br{display:none}
-  .col-reason{display:none}
   .panel-head{flex-direction:column;align-items:stretch}
   .footer-inner{flex-direction:column;gap:28px}
+  /* table scrolls horizontally instead of squashing/hiding columns */
+  .table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  table.events{min-width:680px}
+  /* filters wrap onto multiple lines */
+  .searchbar{flex-wrap:wrap;gap:10px}
+  .filter-group{flex-wrap:wrap}
+  .daterow{flex-wrap:wrap;gap:10px}
+  .daterow-sep{display:none}
+  .hero-inner{padding:40px 20px 34px}
+  .layout{padding:20px 16px 36px}
+}
+@media (max-width:420px){
+  .hero h1{font-size:30px}
+  .chip{font-size:11px;padding:6px 10px}
 }
 
 /* ============ added: lang toggle, search, date, ref badge ============ */
@@ -282,10 +295,8 @@ body.lang-ko .panel-head h2,body.lang-ko .card h3,body.lang-ko .doc h1,body.lang
 .alert-scope{font-size:11.5px;color:#6a5a3a;background:#f2ede1;border-radius:var(--radius);padding:8px 11px;margin-top:12px;line-height:1.5}
 .alert-scope strong{color:var(--amber)}
 
-/* --- fix: keep date column from being cut off --- */
-.col-reason{max-width:300px;width:300px}
-.table-scroll{overflow-x:auto}
-table.events{min-width:680px}
+/* --- date column kept from being cut off --- */
+.col-reason{max-width:300px}
 
 /* ============ code badge tooltip ============ */
 .code-badge{position:relative;cursor:help;border-bottom:1px dotted var(--teal)}
@@ -330,3 +341,17 @@ body.lang-ko .type-badge{font-family:"IBM Plex Sans KR",sans-serif;font-size:10p
 .daterow{flex-wrap:wrap}
 .daterow-sep{flex:1;min-width:8px}
 #typeFilter{margin-right:4px}
+
+/* 광고 영역 임시 숨김 — 애드센스 적용 시 이 블록 삭제 */
+.ad-wrap, .ad-slot { display: none !important; }
+
+/* ============ load more button ============ */
+.table-foot{padding:16px 0 4px;text-align:center}
+.load-more{
+  background:var(--paper);border:1px solid var(--line);color:var(--navy);
+  font-family:"IBM Plex Sans",sans-serif;font-size:13px;font-weight:600;
+  padding:10px 22px;border-radius:8px;cursor:pointer;transition:.15s;letter-spacing:.2px;
+}
+.load-more:hover{background:var(--navy);color:#fff;border-color:var(--navy)}
+.load-more .lm-sub{font-weight:400;opacity:.6;font-size:12px}
+body.lang-ko .load-more{font-family:"IBM Plex Sans KR",sans-serif}

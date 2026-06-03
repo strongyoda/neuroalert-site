@@ -68,16 +68,18 @@ function getFiltered(){
   });
 }
 
+let VISIBLE = 100;  // 현재 보여주는 개수
+const PAGE = 100;   // 더 보기 단위
+
 function render(){
   const body = document.getElementById("eventsBody");
   const status = document.getElementById("status");
   const foot = document.getElementById("tableFoot");
   const list = getFiltered();
   body.innerHTML = "";
-  if(list.length===0){ status.textContent = t("js_none"); foot.textContent=""; return; }
+  if(list.length===0){ status.textContent = t("js_none"); foot.innerHTML=""; return; }
   status.textContent = t("js_showing",{n:list.length.toLocaleString()}) + " · " + t("js_newest");
-  // cap render to 200 rows for performance; note the rest
-  const shown = list.slice(0,200);
+  const shown = list.slice(0, VISIBLE);
   const frag = document.createDocumentFragment();
   shown.forEach(e=>{
     const tr = document.createElement("tr");
@@ -93,8 +95,23 @@ function render(){
     frag.appendChild(tr);
   });
   body.appendChild(frag);
-  foot.textContent = list.length>200 ? ("… "+(list.length-200).toLocaleString()+" more") : "";
+  // 더 보기 버튼
+  const remaining = list.length - VISIBLE;
+  if(remaining > 0){
+    const next = Math.min(PAGE, remaining);
+    foot.innerHTML = '<button id="loadMore" class="load-more">'
+      + t("js_loadmore",{n:next.toLocaleString()})
+      + ' <span class="lm-sub">('+remaining.toLocaleString()+' '+t("js_remaining")+')</span></button>';
+    document.getElementById("loadMore").addEventListener("click",()=>{
+      VISIBLE += PAGE; render();
+    });
+  } else {
+    foot.innerHTML = "";
+  }
 }
+
+// 필터/검색 바뀌면 100개부터 다시 시작
+function resetAndRender(){ VISIBLE = 100; render(); }
 
 function esc(s){
   if(s==null) return "";
@@ -145,29 +162,29 @@ document.getElementById("unsubToggle").addEventListener("click", ()=>{
 document.getElementById("sourceFilter").addEventListener("click",(e)=>{
   const btn=e.target.closest(".chip"); if(!btn) return;
   document.querySelectorAll("#sourceFilter .chip").forEach(c=>c.classList.remove("active"));
-  btn.classList.add("active"); CURRENT_SRC=btn.dataset.src; render();
+  btn.classList.add("active"); CURRENT_SRC=btn.dataset.src; resetAndRender();
 });
 document.getElementById("typeFilter").addEventListener("click",(e)=>{
   const btn=e.target.closest(".chip"); if(!btn) return;
   document.querySelectorAll("#typeFilter .chip").forEach(c=>c.classList.remove("active"));
-  btn.classList.add("active"); CURRENT_TYPE=btn.dataset.type; render();
+  btn.classList.add("active"); CURRENT_TYPE=btn.dataset.type; resetAndRender();
 });
 let searchTimer;
 document.getElementById("searchInput").addEventListener("input",(e)=>{
   clearTimeout(searchTimer);
-  searchTimer = setTimeout(()=>{ SEARCH_Q=e.target.value.trim().toLowerCase(); render(); }, 200);
+  searchTimer = setTimeout(()=>{ SEARCH_Q=e.target.value.trim().toLowerCase(); resetAndRender(); }, 200);
 });
 document.getElementById("dateFrom").addEventListener("change",(e)=>{
-  DATE_FROM = e.target.value ? new Date(e.target.value+"T00:00:00") : null; render();
+  DATE_FROM = e.target.value ? new Date(e.target.value+"T00:00:00") : null; resetAndRender();
 });
 document.getElementById("dateTo").addEventListener("change",(e)=>{
-  DATE_TO = e.target.value ? new Date(e.target.value+"T23:59:59") : null; render();
+  DATE_TO = e.target.value ? new Date(e.target.value+"T23:59:59") : null; resetAndRender();
 });
 document.getElementById("dateClear").addEventListener("click",()=>{
   DATE_FROM=DATE_TO=null;
   document.getElementById("dateFrom").value="";
   document.getElementById("dateTo").value="";
-  render();
+  resetAndRender();
 });
 
 loadEvents();
