@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>NeuroAlert — Global Neurovascular Device Safety Monitor</title>
-<meta name="description" content="NeuroAlert aggregates neurovascular medical device recall and safety signals from the US FDA, Korea MFDS, and Japan PMDA into a single monitoring dashboard for clinicians.">
+<meta name="description" content="NeuroAlert aggregates neurovascular medical device recall and safety signals from the US FDA, Korea MFDS, and Australia TGA into a single monitoring dashboard for clinicians.">
 <!-- ===== Google AdSense: paste verification/script here after approval ===== -->
 <!-- <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script> -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -48,7 +48,7 @@
   <div class="hero-inner">
     <div class="hero-eyebrow" data-i18n="hero_eyebrow">REGULATORY SIGNAL MONITOR</div>
     <h1 data-i18n="hero_title">Global Neurovascular Device<br>Safety Surveillance</h1>
-    <p class="hero-sub" data-i18n="hero_sub">Consolidated recall and adverse-event signals for neurointerventional devices — drawn from the U.S. FDA, Korea MFDS, and Japan PMDA public post-market databases.</p>
+    <p class="hero-sub" data-i18n="hero_sub">Consolidated recall and adverse-event signals for neurointerventional devices — drawn from the U.S. FDA, Korea MFDS, and Australia TGA public post-market databases.</p>
     <div class="hero-meta">
       <div class="hm"><span class="hm-num" id="statTotal">—</span><span class="hm-lab" data-i18n="stat_records">Tracked records</span></div>
       <div class="hm"><span class="hm-num" id="statSources">3</span><span class="hm-lab" data-i18n="stat_sources">Regulators</span></div>
@@ -80,7 +80,7 @@
           <button data-src="ALL" class="chip active" data-i18n="filter_all">All</button>
           <button data-src="US" class="chip">US&nbsp;FDA</button>
           <button data-src="KR" class="chip">KR&nbsp;MFDS</button>
-          <button data-src="JP" class="chip">JP&nbsp;PMDA</button>
+          <button data-src="AU" class="chip">AU&nbsp;TGA</button>
         </div>
         <button id="refreshBtn" class="btn-ghost" title="Refresh">
           <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M13 8a5 5 0 1 1-1.5-3.5M13 2v3h-3" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="square"/></svg>
@@ -140,7 +140,7 @@
         </div>
       </div>
       <p id="subMsg" class="msg"></p>
-      <div class="alert-scope" data-i18n="alert_scope">Alerts cover <strong>US &amp; Korea</strong> recalls. Japan data is reference-only and not included in alerts.</div>
+      <div class="alert-scope" data-i18n="alert_scope">Alerts cover <strong>US, Korea &amp; Australia</strong> device recalls.</div>
       <p class="fineprint" data-i18n="sub_fine">Your email is used only to send alerts and is deleted immediately on unsubscribe. See our <a href="privacy.html">Privacy Policy</a>.</p>
     </div>
 
@@ -151,7 +151,7 @@
       <ul class="src-list">
         <li><span class="src-flag us">US</span> <span data-i18n="src_us">FDA openFDA — Recall &amp; Event</span></li>
         <li><span class="src-flag kr">KR</span> <span data-i18n="src_kr">MFDS — Medical Device Recall</span></li>
-        <li><span class="src-flag jp">JP</span> <span data-i18n="src_jp">PMDA — JAMDER Cases</span> <span class="ref-badge" data-i18n="ref_badge">reference</span></li>
+        <li><span class="src-flag au">AU</span> <span data-i18n="src_au">TGA DRAC — Device Recalls</span></li>
       </ul>
       <a href="methodology.html" class="link-btn" data-i18n="src_more">How signals are filtered →</a>
     </div>
@@ -162,7 +162,7 @@
       <ul class="cov-list">
         <li><span class="src-flag us">US</span> <span data-i18n="cov_us">Recalls + adverse events, auto-updated.</span></li>
         <li><span class="src-flag kr">KR</span> <span data-i18n="cov_kr">Recall/withdrawal items only. No public adverse-event or detailed-reason data; product names are class-level.</span></li>
-        <li><span class="src-flag jp">JP</span> <span data-i18n="cov_jp">Reference snapshot, updated periodically. Not in alerts. No manufacturer/product names (PMDA policy).</span></li>
+        <li><span class="src-flag au">AU</span> <span data-i18n="cov_au">Device recalls with manufacturer, product, reason, hazard class, and date.</span></li>
       </ul>
     </div>
 
@@ -206,7 +206,7 @@
         <span class="fcol-h" data-i18n="foot_data">Data</span>
         <a href="https://open.fda.gov" target="_blank" rel="noopener">openFDA</a>
         <a href="https://www.mfds.go.kr" target="_blank" rel="noopener">MFDS</a>
-        <a href="https://www.pmda.go.jp" target="_blank" rel="noopener">PMDA</a>
+        <a href="https://www.tga.gov.au" target="_blank" rel="noopener">TGA</a>
       </div>
     </div>
   </div>

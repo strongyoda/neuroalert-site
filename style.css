@@ -16,7 +16,7 @@
   --teal:#1f6f6f;         /* muted teal accent */
   --teal-ink:#0f4747;
   --amber:#9a6a1f;        /* warning/disclaimer ink */
-  --us:#1c3a5e; --kr:#7a2e3a; --jp:#3a5a2e;  /* source tags, desaturated */
+  --us:#1c3a5e; --kr:#7a2e3a; --au:#8a6d1f;  /* source tags, desaturated */
   --shadow:0 1px 2px rgba(22,32,46,.06),0 8px 24px rgba(22,32,46,.05);
   --radius:4px;
 }
@@ -150,7 +150,7 @@ table.events{width:100%;border-collapse:collapse;font-size:13.5px}
   display:inline-block;font-family:"IBM Plex Mono",monospace;font-size:10.5px;font-weight:600;
   color:#fff;padding:2px 6px;border-radius:3px;letter-spacing:.5px;
 }
-.src-flag.us{background:var(--us)}.src-flag.kr{background:var(--kr)}.src-flag.jp{background:var(--jp)}
+.src-flag.us{background:var(--us)}.src-flag.kr{background:var(--kr)}.src-flag.au{background:var(--au)}
 
 /* ---------- sidebar cards ---------- */
 .sidebar{display:flex;flex-direction:column;gap:20px;position:sticky;top:74px}
@@ -329,8 +329,4 @@ body.lang-ko .type-badge{font-family:"IBM Plex Sans KR",sans-serif;font-size:10p
 /* daterow separator + type filter spacing */
 .daterow{flex-wrap:wrap}
 .daterow-sep{flex:1;min-width:8px}
-
-
-/* 광고 영역 임시 숨김 — 애드센스 적용 시 이 블록 삭제 */
-.ad-wrap, .ad-slot { display: none !important; }
 #typeFilter{margin-right:4px}
