@@ -164,7 +164,13 @@ const CODE_INFO = {
     "MFE": "Injectable embolic agent (liquid embolic)",
     "QCA": "Coil-assist (stent-assisted coiling) stent",
     "POL": "Mechanical thrombectomy device (acute stroke)",
-    "DQY": "Percutaneous catheter (neurovascular brands only)"
+    "DQY": "Percutaneous catheter (neurovascular brands only)",
+    "Class I": "Australia TGA hazard class — Class I: highest risk, may cause death or serious injury",
+    "Class II": "Australia TGA hazard class — Class II: moderate risk, may cause temporary or reversible injury",
+    "Class III": "Australia TGA hazard class — Class III: lowest risk, unlikely to cause injury",
+    "Type I": "Health Canada recall class — Type I: highest risk, reasonable probability of serious harm or death",
+    "Type II": "Health Canada recall class — Type II: moderate risk, may cause temporary or reversible harm",
+    "Type III": "Health Canada recall class — Type III: lowest risk, unlikely to cause harm"
   },
   ko: {
     "OUT": "플로우 다이버터 — 두개내 동맥류에서 혈류를 우회시키는 기기",
@@ -177,7 +183,13 @@ const CODE_INFO = {
     "MFE": "주입형 색전물질 (액상 색전)",
     "QCA": "코일 보조(스텐트 보조 코일링) 스텐트",
     "POL": "기계적 혈전절제 기기 (급성 뇌졸중)",
-    "DQY": "경피적 카테터 (신경중재 브랜드만 포함)"
+    "DQY": "경피적 카테터 (신경중재 브랜드만 포함)",
+    "Class I": "호주 TGA 위험등급 — Class I: 최고 위험, 사망·중상 유발 가능",
+    "Class II": "호주 TGA 위험등급 — Class II: 중간 위험, 일시적·회복 가능한 손상 유발 가능",
+    "Class III": "호주 TGA 위험등급 — Class III: 최저 위험, 손상 가능성 낮음",
+    "Type I": "캐나다 보건부 회수등급 — Type I: 최고 위험, 심각한 위해·사망 가능성 있음",
+    "Type II": "캐나다 보건부 회수등급 — Type II: 중간 위험, 일시적·회복 가능한 위해 가능",
+    "Type III": "캐나다 보건부 회수등급 — Type III: 최저 위험, 위해 가능성 낮음"
   }
 };
 function codeInfo(code){
@@ -185,8 +197,15 @@ function codeInfo(code){
   const lang = (typeof LANG !== "undefined") ? LANG : "en";
   if(CODE_INFO[lang] && CODE_INFO[lang][code]) return CODE_INFO[lang][code];
   if(CODE_INFO.en[code]) return CODE_INFO.en[code];
-  // 한국 품목분류코드 등 사전에 없는 코드
+  // 한국 품목분류코드 패턴 (A12345.06 처럼 영문+숫자.숫자)
+  const isKoreaCode = /^[A-Z]\d{4,5}(\.\d+)?$/.test(code);
+  if(isKoreaCode){
+    return (lang==="ko")
+      ? "한국 식약처 의료기기 품목분류코드 (품목명은 기기 설명 참고)"
+      : "Korea MFDS device class code (see device name for description)";
+  }
+  // 그 외 알 수 없는 코드
   return (lang==="ko")
-    ? "한국 식약처 의료기기 품목분류코드 (품목명은 기기 설명 참고)"
-    : "Korea MFDS device class code (see device name for description)";
+    ? "분류 코드 (기기 설명 참고)"
+    : "Classification code (see device description)";
 }
