@@ -88,11 +88,22 @@ function render(){
     const src = (e.source||"").toLowerCase();
     const et = (e.event_type||"recall");
     const typeBadge = '<span class="type-badge '+et+'">'+t(et==="event"?"badge_event":"badge_recall")+'</span>';
+    // 조치 (있고, 기본 문구가 아닐 때만)
+    const noAction = "별도 안내 없음 (제조사 문의 요망)";
+    let actionHtml = "";
+    if(e.action_required && e.action_required !== noAction){
+      actionHtml = '<div class="action-line"><span class="action-label">'+t("action_label")+'</span> '+esc(e.action_required)+'</div>';
+    }
+    // Detail 링크
+    let detailHtml = "";
+    if(e.detail_url){
+      detailHtml = '<a class="detail-link" href="'+esc(e.detail_url)+'" target="_blank" rel="noopener">'+t("detail_btn")+'</a>';
+    }
     tr.innerHTML =
       '<td class="col-src"><span class="src-flag '+src+'">'+(e.source||"—")+'</span></td>'+
       '<td class="col-dev"><div class="dev-name">'+(esc(e.device_name)||"—")+'</div>'+typeBadge+'</td>'+
       '<td class="col-code">'+(e.category?'<span class="code-badge" data-tip="'+esc(codeInfo(e.category))+'">'+esc(e.category)+'</span>':"—")+'</td>'+
-      '<td class="col-reason"><div class="reason-text">'+(esc(e.reason)||"—")+'</div></td>'+
+      '<td class="col-reason"><div class="reason-text">'+(esc(e.reason)||"—")+'</div>'+actionHtml+detailHtml+'</td>'+
       '<td class="col-date"><span class="date-cell">'+fmtDate(e.event_date)+'</span></td>';
     frag.appendChild(tr);
   });

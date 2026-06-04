@@ -355,3 +355,10 @@ body.lang-ko .type-badge{font-family:"IBM Plex Sans KR",sans-serif;font-size:10p
 .load-more:hover{background:var(--navy);color:#fff;border-color:var(--navy)}
 .load-more .lm-sub{font-weight:400;opacity:.6;font-size:12px}
 body.lang-ko .load-more{font-family:"IBM Plex Sans KR",sans-serif}
+
+/* ============ 조치 + 원본 링크 ============ */
+.action-line{margin-top:7px;font-size:12.5px;line-height:1.5;color:var(--navy);background:#eef3f0;border-left:3px solid var(--teal);padding:6px 10px;border-radius:0 4px 4px 0}
+.action-label{font-weight:700;color:var(--teal)}
+.detail-link{display:inline-block;margin-top:7px;font-size:12px;font-weight:600;color:var(--teal);text-decoration:none;border-bottom:1px solid transparent}
+.detail-link:hover{border-bottom-color:var(--teal)}
+body.lang-ko .action-line,body.lang-ko .detail-link{font-family:"IBM Plex Sans KR",sans-serif}
