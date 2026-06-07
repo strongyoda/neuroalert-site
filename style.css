@@ -362,3 +362,10 @@ body.lang-ko .load-more{font-family:"IBM Plex Sans KR",sans-serif}
 .detail-link{display:inline-block;margin-top:7px;font-size:12px;font-weight:600;color:var(--teal);text-decoration:none;border-bottom:1px solid transparent}
 .detail-link:hover{border-bottom-color:var(--teal)}
 body.lang-ko .action-line,body.lang-ko .detail-link{font-family:"IBM Plex Sans KR",sans-serif}
+
+/* ============ 분류 배지 (카테고리·사유유형) ============ */
+.class-badges{margin-top:6px;display:flex;flex-wrap:wrap;gap:5px}
+.class-badge{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:10px;line-height:1.5}
+.class-badge.cat{background:#e8eef5;color:#1C3A5E;border:1px solid #c5d4e3}
+.class-badge.rsn{background:#f3ece2;color:#7a5a1e;border:1px solid #e0d0b8}
+body.lang-ko .class-badge{font-family:"IBM Plex Sans KR",sans-serif}

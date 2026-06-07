@@ -213,3 +213,29 @@ function codeInfo(code){
     ? "분류 코드 (기기 설명 참고)"
     : "Classification code (see device description)";
 }
+
+// ===== 분류 라벨 양국어 사전 (DB는 한글 저장, 화면은 토글 따라) =====
+const CLASS_LABELS = {
+  // device_category
+  "플로우다이버터": {en:"Flow Diverter", ko:"플로우다이버터"},
+  "색전코일": {en:"Embolization Coil", ko:"색전코일"},
+  "혈전제거": {en:"Thrombectomy", ko:"혈전제거"},
+  "스텐트": {en:"Stent", ko:"스텐트"},
+  "카테터·가이드와이어": {en:"Catheter / Guidewire", ko:"카테터·가이드와이어"},
+  "색전물질": {en:"Embolic Agent", ko:"색전물질"},
+  "두개내압모니터": {en:"ICP Monitor", ko:"두개내압모니터"},
+  // reason_type
+  "제조결함": {en:"Manufacturing Defect", ko:"제조결함"},
+  "멸균문제": {en:"Sterility Issue", ko:"멸균문제"},
+  "성능저하": {en:"Performance Issue", ko:"성능저하"},
+  "라벨링·표시": {en:"Labeling", ko:"라벨링·표시"},
+  "재질·부품": {en:"Material / Component", ko:"재질·부품"},
+  "설계결함": {en:"Design Defect", ko:"설계결함"},
+  "기타": {en:"Other", ko:"기타"}
+};
+function classLabel(val){
+  if(!val) return "";
+  const lang = (typeof LANG !== "undefined") ? LANG : "en";
+  if(CLASS_LABELS[val]) return CLASS_LABELS[val][lang] || val;
+  return val;
+}

@@ -3,7 +3,7 @@
 // ============================================================
 let ALL_EVENTS = [];
 let CURRENT_SRC = "ALL";
-let CURRENT_TYPE = "ALL";
+let CURRENT_TYPE = "recall";
 let SEARCH_Q = "";
 let DATE_FROM = null, DATE_TO = null;
 
@@ -63,7 +63,9 @@ function getFiltered(){
     if(DATE_FROM && (!e._date || e._date < DATE_FROM)) return false;
     if(DATE_TO && (!e._date || e._date > DATE_TO)) return false;
     if(SEARCH_Q){
-      const hay = ((e.device_name||"")+" "+(e.reason||"")+" "+(e.category||"")+" "+(e.source||"")).toLowerCase();
+      const hay = ((e.device_name||"")+" "+(e.reason||"")+" "+(e.category||"")+" "+(e.source||"")
+        +" "+(e.device_category||"")+" "+(e.reason_type||"")
+        +" "+classLabel(e.device_category)+" "+classLabel(e.reason_type)).toLowerCase();
       if(!hay.includes(SEARCH_Q)) return false;
     }
     return true;
@@ -99,9 +101,18 @@ function render(){
     if(e.detail_url){
       detailHtml = '<a class="detail-link" href="'+esc(e.detail_url)+'" target="_blank" rel="noopener">'+t("detail_btn")+'</a>';
     }
+    // 분류 배지 (기기 카테고리 + 사유 유형)
+    let classHtml = "";
+    if(e.device_category && e.device_category !== "기타"){
+      classHtml += '<span class="class-badge cat">'+esc(classLabel(e.device_category))+'</span>';
+    }
+    if(e.reason_type && e.reason_type !== "기타"){
+      classHtml += '<span class="class-badge rsn">'+esc(classLabel(e.reason_type))+'</span>';
+    }
+    if(classHtml) classHtml = '<div class="class-badges">'+classHtml+'</div>';
     tr.innerHTML =
       '<td class="col-src"><span class="src-flag '+src+'">'+(e.source||"—")+'</span></td>'+
-      '<td class="col-dev"><div class="dev-name">'+(esc(e.device_name)||"—")+'</div>'+typeBadge+'</td>'+
+      '<td class="col-dev"><div class="dev-name">'+(esc(e.device_name)||"—")+'</div>'+typeBadge+classHtml+'</td>'+
       '<td class="col-code">'+(e.category?'<span class="code-badge" data-tip="'+esc(codeInfo(e.category))+'">'+esc(e.category)+'</span>':"—")+'</td>'+
       '<td class="col-reason"><div class="reason-text">'+(esc(e.reason)||"—")+'</div>'+actionHtml+detailHtml+'</td>'+
       '<td class="col-date"><span class="date-cell">'+fmtDate(e.event_date)+'</span></td>';
