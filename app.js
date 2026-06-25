@@ -1,5 +1,6 @@
 // ============================================================
 // NeuroAlert dashboard logic (search + date range + i18n)
+// Recalls = grouped + expandable / Adverse events = simple list
 // ============================================================
 let ALL_EVENTS = [];
 let CURRENT_SRC = "ALL";
@@ -64,6 +65,7 @@ function getFiltered(){
     if(DATE_TO && (!e._date || e._date > DATE_TO)) return false;
     if(SEARCH_Q){
       const hay = ((e.device_name||"")+" "+(e.reason||"")+" "+(e.category||"")+" "+(e.source||"")
+        +" "+(e.manufacturer||"")+" "+(e.product_name||"")
         +" "+(e.device_category||"")+" "+(e.reason_type||"")
         +" "+classLabel(e.device_category)+" "+classLabel(e.reason_type)).toLowerCase();
       if(!hay.includes(SEARCH_Q)) return false;
@@ -75,63 +77,144 @@ function getFiltered(){
 let VISIBLE = 100;  // 현재 보여주는 개수
 const PAGE = 100;   // 더 보기 단위
 
+// ===== 회사/기기명 분리 =====
+function splitCompanyDevice(e){
+  let company = "", device = e.device_name || "";
+  if(e.source === "JP" && e.manufacturer){
+    company = String(e.manufacturer).split("製造販売業者")[0].trim();
+    device = e.device_name || "";
+  } else if(device.includes(" — ")){
+    const parts = device.split(" — ");
+    company = parts[0].trim();
+    device = parts.slice(1).join(" — ").trim();
+  }
+  return { company, device };
+}
+
+// 변형 묶기 키 (같은 날짜 + 회사 + 제품명 뿌리. 사이즈/모델만 다른 것끼리)
+function groupKey(company, device, dateRaw){
+  const root = device.toLowerCase()
+    .replace(/\b\d+(\.\d+)?\s*(fr|f|mm|cm|g|ga|inch|in)\b/g," ")  // 사이즈 토큰
+    .replace(/[\d.,/()×x]+/g," ")                                // 숫자·기호
+    .replace(/\s+/g," ").trim().slice(0,40);
+  const day = (dateRaw||"").slice(0,10);                         // 날짜(일 단위)
+  return (day+"|"+company.toLowerCase()+"|"+root);
+}
+
 function render(){
   const body = document.getElementById("eventsBody");
   const status = document.getElementById("status");
-  const foot = document.getElementById("tableFoot");
   const list = getFiltered();
   body.innerHTML = "";
-  if(list.length===0){ status.textContent = t("js_none"); foot.innerHTML=""; return; }
+  if(list.length===0){ status.textContent = t("js_none"); document.getElementById("tableFoot").innerHTML=""; return; }
+
+  const isRecall = (CURRENT_TYPE !== "event");
+
+  // ===== 이상사례(MAUDE) 모드: 단순 목록, 펼침 없음 =====
+  if(!isRecall){
+    status.textContent = t("js_showing",{n:list.length.toLocaleString()}) + " · " + t("js_event_note","이상사례 신고 (회수 아님)");
+    const shown = list.slice(0, VISIBLE);
+    const frag = document.createDocumentFragment();
+    shown.forEach(e=>{
+      const {company, device} = splitCompanyDevice(e);
+      const tr = document.createElement("tr");
+      tr.className = "ev-row";
+      tr.innerHTML =
+        '<td class="col-src"><span class="src-flag '+(e.source||"").toLowerCase()+'">'+(e.source||"—")+'</span></td>'+
+        '<td class="col-company">'+(esc(company)||"—")+'</td>'+
+        '<td class="col-dev"><div class="dev-name">'+(esc(device)||"—")+'</div></td>'+
+        '<td class="col-class"><span class="reason-text">'+(esc(e.reason)||"—")+'</span></td>'+
+        '<td class="col-date">'+fmtDate(e.event_date)+'</td>';
+      frag.appendChild(tr);
+    });
+    body.appendChild(frag);
+    renderFoot(list.length);
+    return;
+  }
+
+  // ===== 리콜 모드: 회사+제품 묶기 + 클릭 펼침 =====
   status.textContent = t("js_showing",{n:list.length.toLocaleString()}) + " · " + t("js_newest");
-  const shown = list.slice(0, VISIBLE);
+
+  const groups = new Map();
+  list.forEach(e=>{
+    const {company, device} = splitCompanyDevice(e);
+    const k = groupKey(company, device, e.event_date);
+    if(!groups.has(k)) groups.set(k, {company, device, source:e.source, _date:e._date, items:[]});
+    const g = groups.get(k);
+    g.items.push({...e, _company:company, _device:device});
+    if(e._date && (!g._date || e._date > g._date)){ g._date = e._date; g.device = device; }
+  });
+  const groupList = [...groups.values()].sort((a,b)=> (b._date||0)-(a._date||0));
+
+  const shown = groupList.slice(0, VISIBLE);
   const frag = document.createDocumentFragment();
-  shown.forEach(e=>{
-    const tr = document.createElement("tr");
-    const src = (e.source||"").toLowerCase();
-    const et = (e.event_type||"recall");
-    const typeBadge = '<span class="type-badge '+et+'">'+t(et==="event"?"badge_event":"badge_recall")+'</span>';
-    // 조치 (있고, 기본 문구가 아닐 때만)
-    const noAction = "별도 안내 없음 (제조사 문의 요망)";
-    let actionHtml = "";
-    if(e.action_required && e.action_required !== noAction){
-      actionHtml = '<div class="action-line"><span class="action-label">'+t("action_label")+'</span> '+esc(e.action_required)+'</div>';
-    }
-    // Detail 링크
-    let detailHtml = "";
-    if(e.detail_url){
-      detailHtml = '<a class="detail-link" href="'+esc(e.detail_url)+'" target="_blank" rel="noopener">'+t("detail_btn")+'</a>';
-    }
-    // 분류 배지 (기기 카테고리 + 사유 유형)
+  shown.forEach((g)=>{
+    const e0 = g.items[0];
+    const src = (g.source||"").toLowerCase();
+    const variantCount = g.items.length;
+
     let classHtml = "";
-    if(e.device_category && e.device_category !== "기타"){
-      classHtml += '<span class="class-badge cat">'+esc(classLabel(e.device_category))+'</span>';
-    }
-    if(e.reason_type && e.reason_type !== "기타"){
-      classHtml += '<span class="class-badge rsn">'+esc(classLabel(e.reason_type))+'</span>';
-    }
-    if(classHtml) classHtml = '<div class="class-badges">'+classHtml+'</div>';
+    if(e0.device_category && e0.device_category !== "기타")
+      classHtml += '<span class="class-badge cat">'+esc(classLabel(e0.device_category))+'</span>';
+    if(e0.reason_type && e0.reason_type !== "기타")
+      classHtml += '<span class="class-badge rsn">'+esc(classLabel(e0.reason_type))+'</span>';
+
+    const tr = document.createElement("tr");
+    tr.className = "recall-row";
     tr.innerHTML =
-      '<td class="col-src"><span class="src-flag '+src+'">'+(e.source||"—")+'</span></td>'+
-      '<td class="col-dev"><div class="dev-name">'+(esc(e.device_name)||"—")+'</div>'+typeBadge+classHtml+'</td>'+
-      '<td class="col-code">'+(e.category?'<span class="code-badge" data-tip="'+esc(codeInfo(e.category))+'">'+esc(e.category)+'</span>':"—")+'</td>'+
-      '<td class="col-reason"><div class="reason-text">'+(esc(e.reason)||"—")+'</div>'+actionHtml+detailHtml+'</td>'+
-      '<td class="col-date"><span class="date-cell">'+fmtDate(e.event_date)+'</span></td>';
+      '<td class="col-src"><span class="src-flag '+src+'">'+(g.source||"—")+'</span></td>'+
+      '<td class="col-company">'+(esc(g.company)||"—")+'</td>'+
+      '<td class="col-dev"><div class="dev-name">'+(esc(g.device)||"—")+'</div>'+
+        (variantCount>1?'<span class="variant-count">+'+(variantCount-1)+' '+t("js_variant","변형")+'</span>':'')+
+        '<span class="detail-hint">'+t("js_detail_hint","상세 보기")+'</span>'+
+        '<span class="expand-caret">▾</span></td>'+
+      '<td class="col-class">'+(classHtml||"—")+'</td>'+
+      '<td class="col-date">'+fmtDate(g._date ? g._date.toISOString() : e0.event_date)+'</td>';
+
+    const detailTr = document.createElement("tr");
+    detailTr.className = "detail-row";
+    detailTr.hidden = true;
+    let inner = '<td colspan="5"><div class="detail-box">';
+    g.items.forEach(it=>{
+      inner += '<div class="detail-item">';
+      inner += '<div class="detail-dev">'+(esc(it._device)||"—")+'</div>';
+      if(it.reason)      inner += '<div class="detail-field"><b>'+t("reason_label","사유")+':</b> '+esc(it.reason)+'</div>';
+      if(it.use_purpose) inner += '<div class="detail-field"><b>'+t("purpose_label","용도")+':</b> '+esc(it.use_purpose)+'</div>';
+      if(it.license_no)  inner += '<div class="detail-field"><b>'+t("license_label","허가번호")+':</b> '+esc(it.license_no)+'</div>';
+      if(it.category)    inner += '<div class="detail-field"><b>'+t("code_label","코드")+':</b> <span data-tip="'+esc(codeInfo(it.category))+'">'+esc(it.category)+'</span></div>';
+      const noAction = "별도 안내 없음 (제조사 문의 요망)";
+      if(it.action_required && it.action_required !== noAction)
+        inner += '<div class="detail-field"><b>'+t("action_label")+'</b> '+esc(it.action_required)+'</div>';
+      if(it.detail_url)
+        inner += '<div class="detail-field"><a class="detail-link" href="'+esc(it.detail_url)+'" target="_blank" rel="noopener">'+t("detail_btn")+'</a></div>';
+      inner += '<div class="detail-date">'+fmtDate(it.event_date)+'</div>';
+      inner += '</div>';
+    });
+    inner += '</div></td>';
+    detailTr.innerHTML = inner;
+
+    tr.addEventListener("click", ()=>{
+      detailTr.hidden = !detailTr.hidden;
+      tr.classList.toggle("expanded", !detailTr.hidden);
+    });
     frag.appendChild(tr);
+    frag.appendChild(detailTr);
   });
   body.appendChild(frag);
-  // 더 보기 버튼
-  const remaining = list.length - VISIBLE;
+  renderFoot(groupList.length);
+}
+
+// 더보기 버튼 (리콜=그룹수, 이상사례=건수)
+function renderFoot(total){
+  const foot = document.getElementById("tableFoot");
+  const remaining = total - VISIBLE;
   if(remaining > 0){
     const next = Math.min(PAGE, remaining);
     foot.innerHTML = '<button id="loadMore" class="load-more">'
       + t("js_loadmore",{n:next.toLocaleString()})
       + ' <span class="lm-sub">('+remaining.toLocaleString()+' '+t("js_remaining")+')</span></button>';
-    document.getElementById("loadMore").addEventListener("click",()=>{
-      VISIBLE += PAGE; render();
-    });
-  } else {
-    foot.innerHTML = "";
-  }
+    document.getElementById("loadMore").addEventListener("click",()=>{ VISIBLE += PAGE; render(); });
+  } else { foot.innerHTML = ""; }
 }
 
 // 필터/검색 바뀌면 100개부터 다시 시작

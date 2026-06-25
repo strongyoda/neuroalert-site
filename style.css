@@ -369,3 +369,70 @@ body.lang-ko .action-line,body.lang-ko .detail-link{font-family:"IBM Plex Sans K
 .class-badge.cat{background:#e8eef5;color:#1C3A5E;border:1px solid #c5d4e3}
 .class-badge.rsn{background:#f3ece2;color:#7a5a1e;border:1px solid #e0d0b8}
 body.lang-ko .class-badge{font-family:"IBM Plex Sans KR",sans-serif}
+
+.recall-row:hover{ background:rgba(0,0,0,.03); }
+.recall-row.expanded{ background:rgba(47,79,111,.06); font-weight:500; }
+.variant-count{ display:inline-block; margin-left:8px; padding:1px 7px; font-size:11px;
+  background:#2F4F6F; color:#fff; border-radius:10px; vertical-align:middle; }
+.detail-row > td{ padding:0 !important; background:#f7f9fb; }
+.detail-box{ padding:12px 18px; }
+.detail-item{ padding:10px 0; border-bottom:1px dashed #d9e0e8; }
+.detail-item:last-child{ border-bottom:none; }
+.detail-dev{ font-weight:600; margin-bottom:4px; }
+.detail-field{ font-size:13px; line-height:1.6; color:#333; }
+.detail-field b{ color:#2F4F6F; }
+.detail-date{ font-size:12px; color:#888; margin-top:3px; }
+
+/* ============================================================
+   펼침 UI — style.css 맨 끝에 붙여넣기
+   (리콜=클릭 펼침/변형 묶기, 이상사례=단순 목록)
+   ============================================================ */
+
+/* 리콜 요약 행 */
+.recall-row{ cursor:pointer; transition:background .12s; }
+.recall-row:hover{ background:rgba(0,0,0,.035); }
+.recall-row.expanded{ background:rgba(47,79,111,.07); }
+.recall-row.expanded .expand-caret{ transform:rotate(180deg); }
+
+/* 펼침 화살표 */
+.expand-caret{
+  float:right; color:#9aa7b4; font-size:11px; margin-left:8px;
+  transition:transform .15s; user-select:none;
+}
+
+/* "+N 변형" 배지 */
+.variant-count{
+  display:inline-block; margin-left:8px; padding:1px 8px;
+  font-size:11px; font-weight:600; background:#2F4F6F; color:#fff;
+  border-radius:10px; vertical-align:middle; letter-spacing:.2px;
+}
+
+/* 상세 펼침 영역 */
+.detail-row > td{ padding:0 !important; background:#f6f9fb; border-top:none; }
+.detail-box{ padding:6px 18px 12px; }
+.detail-item{ padding:11px 0; border-bottom:1px dashed #dbe3ea; }
+.detail-item:last-child{ border-bottom:none; }
+.detail-dev{ font-weight:600; font-size:13.5px; margin-bottom:5px; color:#1d2b3a; }
+.detail-field{ font-size:13px; line-height:1.65; color:#3a4550; margin:2px 0; }
+.detail-field b{ color:#2F4F6F; font-weight:600; margin-right:3px; }
+.detail-date{ font-size:11.5px; color:#94a0ab; margin-top:5px; }
+.detail-row .detail-link{
+  display:inline-block; margin-top:3px; font-size:12.5px;
+  color:#b5384a; text-decoration:none; border-bottom:1px solid currentColor;
+}
+
+/* 새 컬럼 폭 (회사/분류) */
+.events .col-company{ max-width:180px; word-break:break-word; }
+.events .col-class{ white-space:normal; }
+
+/* 이상사례 행 (펼침 없음, 커서 기본) */
+.ev-row{ cursor:default; }
+.ev-row .reason-text{ font-size:13px; color:#3a4550; }
+
+/* 일본 소스 플래그 색 (기존 us/kr/au/ca 옆에 jp 추가) */
+.src-flag.jp{ background:#7a1f2b; color:#fff; }
+
+.detail-hint{
+  display:inline-block; margin-left:8px; font-size:11px; color:#9aa7b4;
+}
+.recall-row:hover .detail-hint{ color:#b5384a; }
