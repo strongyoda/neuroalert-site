@@ -436,3 +436,6 @@ body.lang-ko .class-badge{font-family:"IBM Plex Sans KR",sans-serif}
   display:inline-block; margin-left:8px; font-size:11px; color:#9aa7b4;
 }
 .recall-row:hover .detail-hint{ color:#b5384a; }
+
+.excl-toggle{font-size:12px;color:#667;margin-left:10px;cursor:pointer;display:inline-flex;align-items:center;gap:4px;}
+.excl-toggle input{cursor:pointer;}

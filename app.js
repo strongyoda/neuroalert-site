@@ -1,12 +1,14 @@
 // ============================================================
 // NeuroAlert dashboard logic (search + date range + i18n)
 // Recalls = grouped + expandable / Adverse events = simple list
+// nano X 판정 토글 숨김 + 일본 저장 번역(LANG 연동) 표시
 // ============================================================
 let ALL_EVENTS = [];
 let CURRENT_SRC = "ALL";
 let CURRENT_TYPE = "recall";
 let SEARCH_Q = "";
 let DATE_FROM = null, DATE_TO = null;
+let SHOW_EXCLUDED = false;
 
 function parseDate(raw){
   if(!raw) return null;
@@ -28,6 +30,7 @@ function setConn(state, key){
   document.getElementById("connText").textContent = t(key);
   pill.className = "status-pill " + state;
 }
+function curLang(){ return (typeof LANG !== "undefined") ? LANG : "en"; }
 
 async function loadEvents(){
   document.getElementById("status").textContent = t("js_loading");
@@ -57,8 +60,22 @@ async function loadEvents(){
   }
 }
 
+function jpDevice(e){
+  const lang = curLang();
+  if(lang === "ko" && e.device_name_ko) return e.device_name_ko;
+  if(e.device_name_en) return e.device_name_en;
+  return e.device_name || "";
+}
+function jpReason(e){
+  const lang = curLang();
+  if(lang === "ko" && e.reason_ko) return e.reason_ko;
+  if(e.reason_en) return e.reason_en;
+  return e.reason || "";
+}
+
 function getFiltered(){
   return ALL_EVENTS.filter(e=>{
+    if(!SHOW_EXCLUDED && e.neuro_verdict === "X") return false;
     if(CURRENT_SRC!=="ALL" && e.source!==CURRENT_SRC) return false;
     if(CURRENT_TYPE!=="ALL" && (e.event_type||"recall")!==CURRENT_TYPE) return false;
     if(DATE_FROM && (!e._date || e._date < DATE_FROM)) return false;
@@ -66,6 +83,7 @@ function getFiltered(){
     if(SEARCH_Q){
       const hay = ((e.device_name||"")+" "+(e.reason||"")+" "+(e.category||"")+" "+(e.source||"")
         +" "+(e.manufacturer||"")+" "+(e.product_name||"")
+        +" "+(e.device_name_en||"")+" "+(e.device_name_ko||"")
         +" "+(e.device_category||"")+" "+(e.reason_type||"")
         +" "+classLabel(e.device_category)+" "+classLabel(e.reason_type)).toLowerCase();
       if(!hay.includes(SEARCH_Q)) return false;
@@ -74,31 +92,30 @@ function getFiltered(){
   });
 }
 
-let VISIBLE = 100;  // 현재 보여주는 개수
-const PAGE = 100;   // 더 보기 단위
+let VISIBLE = 100;
+const PAGE = 100;
 
 function splitCompanyDevice(e){
   let company = "", device = e.device_name || "";
+  if(e.source === "JP"){
+    device = jpDevice(e);
+  }
   if(e.manufacturer && String(e.manufacturer).trim()){
-    // 회사 컬럼이 있으면 그걸 사용 (US / CA / JP)
     company = String(e.manufacturer).split("製造販売業者")[0].trim();
-    device = e.device_name || "";
-  } else if(device.includes(" — ")){
-    // 회사가 기기명에 "—"로 붙은 경우 (KR / AU)
-    const parts = device.split(" — ");
+  } else if((e.device_name||"").includes(" — ")){
+    const parts = (e.device_name).split(" — ");
     company = parts[0].trim();
-    device = parts.slice(1).join(" — ").trim();
+    if(e.source !== "JP") device = parts.slice(1).join(" — ").trim();
   }
   return { company, device };
 }
 
-// 변형 묶기 키 (같은 날짜 + 회사 + 제품명 뿌리. 사이즈/모델만 다른 것끼리)
 function groupKey(company, device, dateRaw){
   const root = device.toLowerCase()
-    .replace(/\b\d+(\.\d+)?\s*(fr|f|mm|cm|g|ga|inch|in)\b/g," ")  // 사이즈 토큰
-    .replace(/[\d.,/()×x]+/g," ")                                // 숫자·기호
+    .replace(/\b\d+(\.\d+)?\s*(fr|f|mm|cm|g|ga|inch|in)\b/g," ")
+    .replace(/[\d.,/()×x]+/g," ")
     .replace(/\s+/g," ").trim().slice(0,40);
-  const day = (dateRaw||"").slice(0,10);                         // 날짜(일 단위)
+  const day = (dateRaw||"").slice(0,10);
   return (day+"|"+company.toLowerCase()+"|"+root);
 }
 
@@ -111,9 +128,8 @@ function render(){
 
   const isRecall = (CURRENT_TYPE !== "event");
 
-  // ===== 이상사례(MAUDE) 모드: 단순 목록, 펼침 없음 =====
   if(!isRecall){
-    status.textContent = t("js_showing",{n:list.length.toLocaleString()}) + " · " + t("js_event_note","이상사례 신고 (회수 아님)");
+    status.textContent = t("js_showing",{n:list.length.toLocaleString()}) + " · " + t("js_event_note");
     const shown = list.slice(0, VISIBLE);
     const frag = document.createDocumentFragment();
     shown.forEach(e=>{
@@ -133,7 +149,6 @@ function render(){
     return;
   }
 
-  // ===== 리콜 모드: 회사+제품 묶기 + 클릭 펼침 =====
   status.textContent = t("js_showing",{n:list.length.toLocaleString()}) + " · " + t("js_newest");
 
   const groups = new Map();
@@ -166,8 +181,8 @@ function render(){
       '<td class="col-src"><span class="src-flag '+src+'">'+(g.source||"—")+'</span></td>'+
       '<td class="col-company">'+(esc(g.company)||"—")+'</td>'+
       '<td class="col-dev"><div class="dev-name">'+(esc(g.device)||"—")+'</div>'+
-        (variantCount>1?'<span class="variant-count">+'+(variantCount-1)+' '+t("js_variant","변형")+'</span>':'')+
-        '<span class="detail-hint">'+t("js_detail_hint","상세 보기")+'</span>'+
+        (variantCount>1?'<span class="variant-count">+'+(variantCount-1)+' '+t("js_variant")+'</span>':'')+
+        '<span class="detail-hint">'+t("js_detail_hint")+'</span>'+
         '<span class="expand-caret">▾</span></td>'+
       '<td class="col-class">'+(classHtml||"—")+'</td>'+
       '<td class="col-date">'+fmtDate(g._date ? g._date.toISOString() : e0.event_date)+'</td>';
@@ -179,10 +194,11 @@ function render(){
     g.items.forEach(it=>{
       inner += '<div class="detail-item">';
       inner += '<div class="detail-dev">'+(esc(it._device)||"—")+'</div>';
-      if(it.reason)      inner += '<div class="detail-field"><b>'+t("reason_label","사유")+':</b> '+esc(it.reason)+'</div>';
-      if(it.use_purpose) inner += '<div class="detail-field"><b>'+t("purpose_label","용도")+':</b> '+esc(it.use_purpose)+'</div>';
-      if(it.license_no)  inner += '<div class="detail-field"><b>'+t("license_label","허가번호")+':</b> '+esc(it.license_no)+'</div>';
-      if(it.category)    inner += '<div class="detail-field"><b>'+t("code_label","코드")+':</b> <span data-tip="'+esc(codeInfo(it.category))+'">'+esc(it.category)+'</span></div>';
+      let _reason = (it.source === "JP") ? jpReason(it) : it.reason;
+      if(_reason)        inner += '<div class="detail-field"><b>'+t("reason_label")+':</b> '+esc(_reason)+'</div>';
+      if(it.use_purpose) inner += '<div class="detail-field"><b>'+t("purpose_label")+':</b> '+esc(it.use_purpose)+'</div>';
+      if(it.license_no)  inner += '<div class="detail-field"><b>'+t("license_label")+':</b> '+esc(it.license_no)+'</div>';
+      if(it.category)    inner += '<div class="detail-field"><b>'+t("code_label")+':</b> <span data-tip="'+esc(codeInfo(it.category))+'">'+esc(it.category)+'</span></div>';
       const noAction = "별도 안내 없음 (제조사 문의 요망)";
       if(it.action_required && it.action_required !== noAction)
         inner += '<div class="detail-field"><b>'+t("action_label")+'</b> '+esc(it.action_required)+'</div>';
@@ -205,7 +221,6 @@ function render(){
   renderFoot(groupList.length);
 }
 
-// 더보기 버튼 (리콜=그룹수, 이상사례=건수)
 function renderFoot(total){
   const foot = document.getElementById("tableFoot");
   const remaining = total - VISIBLE;
@@ -218,7 +233,6 @@ function renderFoot(total){
   } else { foot.innerHTML = ""; }
 }
 
-// 필터/검색 바뀌면 100개부터 다시 시작
 function resetAndRender(){ VISIBLE = 100; render(); }
 
 function esc(s){
@@ -226,7 +240,6 @@ function esc(s){
   return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 }
 
-// re-render dynamic text when language changes
 window.onLangChange = function(){
   if(ALL_EVENTS.length) render();
   const pill = document.getElementById("connPill");
@@ -260,7 +273,6 @@ async function unsubscribe(){
 }
 function showMsg(el,text,type){ el.textContent=text; el.className="msg "+type; }
 
-// ---- wire up ----
 document.getElementById("subBtn").addEventListener("click", subscribe);
 document.getElementById("unsubBtn").addEventListener("click", unsubscribe);
 document.getElementById("refreshBtn").addEventListener("click", loadEvents);
@@ -294,12 +306,11 @@ document.getElementById("dateClear").addEventListener("click",()=>{
   document.getElementById("dateTo").value="";
   resetAndRender();
 });
+const _excl = document.getElementById("showExcluded");
+if(_excl) _excl.addEventListener("change",(e)=>{ SHOW_EXCLUDED = e.target.checked; resetAndRender(); });
 
 loadEvents();
 
-// ============================================================
-// Visitor counter — our own backend (privacy-friendly, counts only)
-// ============================================================
 async function loadCounter(){
   const elT = document.getElementById("ccTotal");
   const elD = document.getElementById("ccToday");
