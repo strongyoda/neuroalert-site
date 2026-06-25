@@ -1,7 +1,7 @@
 // ============================================================
 // NeuroAlert dashboard logic (search + date range + i18n)
 // Recalls = grouped + expandable / Adverse events = simple list
-// nano X 판정 토글 숨김 + 일본 저장 번역(LANG 연동) 표시
+// nano X 판정 토글 숨김 + 일본 저장 번역(기기·사유·회사·용도, LANG 연동)
 // ============================================================
 let ALL_EVENTS = [];
 let CURRENT_SRC = "ALL";
@@ -60,6 +60,7 @@ async function loadEvents(){
   }
 }
 
+// ===== 일본 저장 번역 헬퍼 (현재 언어 따라) =====
 function jpDevice(e){
   const lang = curLang();
   if(lang === "ko" && e.device_name_ko) return e.device_name_ko;
@@ -71,6 +72,18 @@ function jpReason(e){
   if(lang === "ko" && e.reason_ko) return e.reason_ko;
   if(e.reason_en) return e.reason_en;
   return e.reason || "";
+}
+function jpMaker(e){
+  const lang = curLang();
+  if(lang === "ko" && e.manufacturer_ko) return e.manufacturer_ko;
+  if(e.manufacturer_en) return e.manufacturer_en;
+  return "";
+}
+function jpPurpose(e){
+  const lang = curLang();
+  if(lang === "ko" && e.use_purpose_ko) return e.use_purpose_ko;
+  if(e.use_purpose_en) return e.use_purpose_en;
+  return e.use_purpose || "";
 }
 
 function getFiltered(){
@@ -84,6 +97,7 @@ function getFiltered(){
       const hay = ((e.device_name||"")+" "+(e.reason||"")+" "+(e.category||"")+" "+(e.source||"")
         +" "+(e.manufacturer||"")+" "+(e.product_name||"")
         +" "+(e.device_name_en||"")+" "+(e.device_name_ko||"")
+        +" "+(e.manufacturer_en||"")+" "+(e.manufacturer_ko||"")
         +" "+(e.device_category||"")+" "+(e.reason_type||"")
         +" "+classLabel(e.device_category)+" "+classLabel(e.reason_type)).toLowerCase();
       if(!hay.includes(SEARCH_Q)) return false;
@@ -99,13 +113,15 @@ function splitCompanyDevice(e){
   let company = "", device = e.device_name || "";
   if(e.source === "JP"){
     device = jpDevice(e);
+    company = jpMaker(e) || String(e.manufacturer||"").split("製造販売業者")[0].trim();
+    return { company, device };
   }
   if(e.manufacturer && String(e.manufacturer).trim()){
     company = String(e.manufacturer).split("製造販売業者")[0].trim();
   } else if((e.device_name||"").includes(" — ")){
     const parts = (e.device_name).split(" — ");
     company = parts[0].trim();
-    if(e.source !== "JP") device = parts.slice(1).join(" — ").trim();
+    device = parts.slice(1).join(" — ").trim();
   }
   return { company, device };
 }
@@ -196,11 +212,12 @@ function render(){
       inner += '<div class="detail-dev">'+(esc(it._device)||"—")+'</div>';
       let _reason = (it.source === "JP") ? jpReason(it) : it.reason;
       if(_reason)        inner += '<div class="detail-field"><b>'+t("reason_label")+':</b> '+esc(_reason)+'</div>';
-      if(it.use_purpose) inner += '<div class="detail-field"><b>'+t("purpose_label")+':</b> '+esc(it.use_purpose)+'</div>';
+      let _purpose = (it.source === "JP") ? jpPurpose(it) : it.use_purpose;
+      if(_purpose)       inner += '<div class="detail-field"><b>'+t("purpose_label")+':</b> '+esc(_purpose)+'</div>';
       if(it.license_no)  inner += '<div class="detail-field"><b>'+t("license_label")+':</b> '+esc(it.license_no)+'</div>';
       if(it.category)    inner += '<div class="detail-field"><b>'+t("code_label")+':</b> <span data-tip="'+esc(codeInfo(it.category))+'">'+esc(it.category)+'</span></div>';
       const noAction = "별도 안내 없음 (제조사 문의 요망)";
-      if(it.action_required && it.action_required !== noAction)
+      if(it.action_required && it.action_required !== noAction && it.source !== "JP")
         inner += '<div class="detail-field"><b>'+t("action_label")+'</b> '+esc(it.action_required)+'</div>';
       if(it.detail_url)
         inner += '<div class="detail-field"><a class="detail-link" href="'+esc(it.detail_url)+'" target="_blank" rel="noopener">'+t("detail_btn")+'</a></div>';
