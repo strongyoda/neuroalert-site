@@ -77,13 +77,14 @@ function getFiltered(){
 let VISIBLE = 100;  // 현재 보여주는 개수
 const PAGE = 100;   // 더 보기 단위
 
-// ===== 회사/기기명 분리 =====
 function splitCompanyDevice(e){
   let company = "", device = e.device_name || "";
-  if(e.source === "JP" && e.manufacturer){
+  if(e.manufacturer && String(e.manufacturer).trim()){
+    // 회사 컬럼이 있으면 그걸 사용 (US / CA / JP)
     company = String(e.manufacturer).split("製造販売業者")[0].trim();
     device = e.device_name || "";
   } else if(device.includes(" — ")){
+    // 회사가 기기명에 "—"로 붙은 경우 (KR / AU)
     const parts = device.split(" — ");
     company = parts[0].trim();
     device = parts.slice(1).join(" — ").trim();
