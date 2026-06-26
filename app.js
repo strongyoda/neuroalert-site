@@ -1,7 +1,7 @@
 // ============================================================
-// NeuroAlert dashboard logic (search + date range + i18n)
-// Recalls = grouped + expandable / Adverse events = simple list
-// nano X 판정 토글 숨김 + 일본 저장 번역(기기·사유·회사·용도, LANG 연동)
+// NeuroAlert dashboard logic
+// Recalls=테이블 / Adverse events=단순목록 / FDA Alerts=피드(카드)
+// nano X 토글 숨김 + 일본 저장 번역 + USEA 중복 분리
 // ============================================================
 let ALL_EVENTS = [];
 let CURRENT_SRC = "ALL";
@@ -9,6 +9,8 @@ let CURRENT_TYPE = "recall";
 let SEARCH_Q = "";
 let DATE_FROM = null, DATE_TO = null;
 let SHOW_EXCLUDED = false;
+
+function isFdaAlert(e){ return String(e.raw_id||"").startsWith("USEA-"); }
 
 function parseDate(raw){
   if(!raw) return null;
@@ -60,7 +62,7 @@ async function loadEvents(){
   }
 }
 
-// ===== 일본 저장 번역 헬퍼 (현재 언어 따라) =====
+// ===== 일본 저장 번역 헬퍼 =====
 function jpDevice(e){
   const lang = curLang();
   if(lang === "ko" && e.device_name_ko) return e.device_name_ko;
@@ -87,10 +89,18 @@ function jpPurpose(e){
 }
 
 function getFiltered(){
+  const wantFda = (CURRENT_TYPE === "fda_alert");
   return ALL_EVENTS.filter(e=>{
+    const fa = isFdaAlert(e);
+    // FDA Alerts 탭이면 USEA만, 그 외 탭이면 USEA 제외 (중복 방지)
+    if(wantFda){
+      if(!fa) return false;
+    } else {
+      if(fa) return false;
+      if(CURRENT_TYPE!=="ALL" && (e.event_type||"recall")!==CURRENT_TYPE) return false;
+    }
     if(!SHOW_EXCLUDED && e.neuro_verdict === "X") return false;
     if(CURRENT_SRC!=="ALL" && e.source!==CURRENT_SRC) return false;
-    if(CURRENT_TYPE!=="ALL" && (e.event_type||"recall")!==CURRENT_TYPE) return false;
     if(DATE_FROM && (!e._date || e._date < DATE_FROM)) return false;
     if(DATE_TO && (!e._date || e._date > DATE_TO)) return false;
     if(SEARCH_Q){
@@ -137,14 +147,84 @@ function groupKey(company, device, dateRaw){
 
 function render(){
   const body = document.getElementById("eventsBody");
+  const feed = document.getElementById("feedBody");
+  const tableScroll = document.querySelector(".table-scroll");
   const status = document.getElementById("status");
   const list = getFiltered();
   body.innerHTML = "";
-  if(list.length===0){ status.textContent = t("js_none"); document.getElementById("tableFoot").innerHTML=""; return; }
+  feed.innerHTML = "";
 
-  const isRecall = (CURRENT_TYPE !== "event");
+  // 모드 결정
+  const mode = (CURRENT_TYPE === "fda_alert") ? "feed"
+             : (CURRENT_TYPE === "event") ? "events" : "recall";
 
-  if(!isRecall){
+  // 테이블/피드 토글
+  feed.hidden = (mode !== "feed");
+  if(tableScroll) tableScroll.style.display = (mode === "feed") ? "none" : "";
+
+  if(list.length===0){
+    status.textContent = t("js_none");
+    document.getElementById("tableFoot").innerHTML="";
+    return;
+  }
+
+  // ===== FDA Alerts 피드 (카드) =====
+  if(mode === "feed"){
+    status.textContent = t("js_showing",{n:list.length.toLocaleString()}) + " · " + t("js_fda_note");
+    const shown = list.slice(0, VISIBLE);
+    const frag = document.createDocumentFragment();
+    shown.forEach(e=>{
+      const isEA = (e.event_type === "early_alert");
+      const card = document.createElement("div");
+      card.className = "fda-card";
+      // 이미지
+      let imgHtml = "";
+      if(e.image_url){
+        imgHtml = '<div class="fda-img"><img src="'+esc(e.image_url)+'" alt="" loading="lazy" onerror="this.parentNode.style.display=\'none\'"></div>';
+      }
+      // 상태 뱃지
+      const badge = isEA
+        ? '<span class="fda-badge ea">'+t("badge_ea")+'</span>'
+        : '<span class="fda-badge recall">'+t("badge_recall_confirmed")+'</span>';
+      // 분류 배지
+      let classHtml = "";
+      if(e.device_category && e.device_category !== "기타")
+        classHtml += '<span class="class-badge cat">'+esc(classLabel(e.device_category))+'</span>';
+      if(e.reason_type && e.reason_type !== "기타")
+        classHtml += '<span class="class-badge rsn">'+esc(classLabel(e.reason_type))+'</span>';
+
+      const reason = esc(e.reason||"");
+      const reasonShort = reason.length > 200 ? reason.slice(0,200)+"…" : reason;
+
+      card.innerHTML =
+        imgHtml +
+        '<div class="fda-body">'+
+          '<div class="fda-top">'+badge+'<span class="fda-date">'+fmtDate(e.event_date)+'</span></div>'+
+          '<div class="fda-title">'+esc(e.device_name||"—")+'</div>'+
+          (classHtml?'<div class="fda-badges">'+classHtml+'</div>':'')+
+          '<div class="fda-reason">'+reasonShort+'</div>'+
+          '<div class="fda-detail" hidden>'+
+            (e.use_purpose?'<div class="detail-field"><b>'+t("purpose_label")+':</b> '+esc(e.use_purpose)+'</div>':'')+
+            (e.action_required?'<div class="detail-field"><b>'+t("action_label")+'</b> '+esc(e.action_required)+'</div>':'')+
+            (e.detail_url?'<div class="detail-field"><a class="detail-link" href="'+esc(e.detail_url)+'" target="_blank" rel="noopener">'+t("detail_btn")+'</a></div>':'')+
+          '</div>'+
+          '<button class="fda-more">'+t("js_detail_hint")+' ▾</button>'+
+        '</div>';
+      const btn = card.querySelector(".fda-more");
+      const det = card.querySelector(".fda-detail");
+      btn.addEventListener("click",()=>{
+        det.hidden = !det.hidden;
+        btn.textContent = (det.hidden ? t("js_detail_hint") : t("js_detail_close")) + " ▾";
+      });
+      frag.appendChild(card);
+    });
+    feed.appendChild(frag);
+    renderFoot(list.length);
+    return;
+  }
+
+  // ===== 이상사례 단순 목록 =====
+  if(mode === "events"){
     status.textContent = t("js_showing",{n:list.length.toLocaleString()}) + " · " + t("js_event_note");
     const shown = list.slice(0, VISIBLE);
     const frag = document.createDocumentFragment();
@@ -165,8 +245,8 @@ function render(){
     return;
   }
 
+  // ===== 리콜 테이블 (묶기 + 펼침) =====
   status.textContent = t("js_showing",{n:list.length.toLocaleString()}) + " · " + t("js_newest");
-
   const groups = new Map();
   list.forEach(e=>{
     const {company, device} = splitCompanyDevice(e);
@@ -184,7 +264,6 @@ function render(){
     const e0 = g.items[0];
     const src = (g.source||"").toLowerCase();
     const variantCount = g.items.length;
-
     let classHtml = "";
     if(e0.device_category && e0.device_category !== "기타")
       classHtml += '<span class="class-badge cat">'+esc(classLabel(e0.device_category))+'</span>';
@@ -226,7 +305,6 @@ function render(){
     });
     inner += '</div></td>';
     detailTr.innerHTML = inner;
-
     tr.addEventListener("click", ()=>{
       detailTr.hidden = !detailTr.hidden;
       tr.classList.toggle("expanded", !detailTr.hidden);

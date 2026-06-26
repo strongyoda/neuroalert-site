@@ -94,6 +94,7 @@
           <button data-type="ALL" class="chip" data-i18n="type_all">All</button>
           <button data-type="recall" class="chip active" data-i18n="type_recall">Recalls</button>
           <button data-type="event" class="chip" data-i18n="type_event">Adverse events</button>
+          <button data-type="fda_alert" class="chip" data-i18n="type_fda_alert">FDA Alerts</button>
         </div>
         <span class="daterow-sep"></span>
         <span class="daterow-label" data-i18n="date_range">Date range</span>
@@ -120,6 +121,7 @@
           <tbody id="eventsBody"></tbody>
         </table>
       </div>
+      <div class="feed" id="feedBody" hidden></div>
       <div class="table-foot" id="tableFoot"></div>
     </div>
 
@@ -169,6 +171,7 @@
         <li><span class="src-flag au">AU</span> <span data-i18n="cov_au">Device recalls with manufacturer, product, reason, hazard class, and date.</span></li>
         <li><span class="src-flag ca">CA</span> <span data-i18n="cov_ca">Device recalls with product, issue, recall class, and date.</span></li>
         <li><span class="src-flag jp">JP</span> <span data-i18n="cov_jp">Device recalls with product, manufacturer, reason, and date (translated from Japanese).</span></li>
+        <li><span class="src-flag us">US</span> <span data-i18n="cov_ea">FDA Alerts: curated most-serious recalls &amp; early alerts with images (CDRH).</span></li>
       </ul>
     </div>
 

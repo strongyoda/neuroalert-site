@@ -439,3 +439,44 @@ body.lang-ko .class-badge{font-family:"IBM Plex Sans KR",sans-serif}
 
 .excl-toggle{font-size:12px;color:#667;margin-left:10px;cursor:pointer;display:inline-flex;align-items:center;gap:4px;}
 .excl-toggle input{cursor:pointer;}
+
+/* ============================================================
+   FDA Alerts 피드 카드 — style.css 맨 끝에 붙여넣기
+   ============================================================ */
+.feed{ display:flex; flex-direction:column; gap:16px; padding:4px 0; }
+
+.fda-card{
+  display:flex; gap:16px; background:#fff; border:1px solid #e3e8ee;
+  border-radius:12px; overflow:hidden; transition:box-shadow .15s, border-color .15s;
+}
+.fda-card:hover{ box-shadow:0 4px 16px rgba(30,50,80,.08); border-color:#cdd6e0; }
+
+.fda-img{ flex:0 0 150px; background:#f3f6f9; display:flex; align-items:center; justify-content:center; }
+.fda-img img{ width:100%; height:100%; max-height:170px; object-fit:contain; padding:10px; }
+
+.fda-body{ flex:1; padding:15px 18px 14px; min-width:0; }
+.fda-top{ display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+.fda-date{ font-size:12px; color:#8a97a4; }
+
+.fda-badge{ font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; letter-spacing:.3px; }
+.fda-badge.ea{ background:#fff4d6; color:#9a6700; border:1px solid #f0d98a; }       /* 노랑: 정보수집중 */
+.fda-badge.recall{ background:#fde2e4; color:#a32330; border:1px solid #f3c0c5; }   /* 빨강: 확정회수 */
+
+.fda-title{ font-family:"Newsreader",serif; font-size:17px; font-weight:600; line-height:1.35; color:#1d2b3a; margin-bottom:7px; }
+.fda-badges{ margin-bottom:8px; }
+.fda-reason{ font-size:13.5px; line-height:1.65; color:#46535f; }
+.fda-detail{ margin-top:10px; padding-top:10px; border-top:1px dashed #dde4ea; }
+.fda-detail .detail-field{ font-size:13px; line-height:1.6; color:#3a4550; margin:4px 0; }
+.fda-detail .detail-field b{ color:#2F4F6F; }
+.fda-detail .detail-link{ color:#b5384a; text-decoration:none; border-bottom:1px solid currentColor; font-size:12.5px; }
+
+.fda-more{
+  margin-top:10px; background:none; border:none; padding:0; cursor:pointer;
+  font-size:12.5px; color:#2F4F6F; font-weight:600;
+}
+.fda-more:hover{ color:#b5384a; }
+
+@media (max-width:560px){
+  .fda-card{ flex-direction:column; }
+  .fda-img{ flex:none; max-height:180px; }
+}
