@@ -444,35 +444,35 @@ body.lang-ko .class-badge{font-family:"IBM Plex Sans KR",sans-serif}
    FDA Alerts 피드 카드 — style.css 맨 끝에 붙여넣기
    ============================================================ */
 .feed{
-  display:grid;
-  grid-template-columns:repeat(auto-fill, minmax(330px, 1fr));
-  gap:20px; padding:6px 0;
+  display:flex; flex-direction:column; align-items:center;
+  gap:26px; padding:8px 0;
 }
 .fda-card{
+  width:100%; max-width:680px;                 /* 인스타식: 한 줄 하나, 중앙 */
   display:flex; flex-direction:column;
-  background:#fff; border:1px solid #e3e8ee; border-radius:14px; overflow:hidden;
-  transition:box-shadow .15s, border-color .15s, transform .15s;
+  background:#fff; border:1px solid #e3e8ee; border-radius:16px; overflow:hidden;
+  transition:box-shadow .15s, border-color .15s;
 }
-.fda-card:hover{ box-shadow:0 6px 22px rgba(30,50,80,.10); border-color:#cdd6e0; transform:translateY(-2px); }
+.fda-card:hover{ box-shadow:0 6px 24px rgba(30,50,80,.10); border-color:#cdd6e0; }
 .fda-img{ width:100%; background:#f3f6f9; display:flex; align-items:center; justify-content:center; border-bottom:1px solid #eef2f6; }
-.fda-img img{ width:100%; max-height:260px; object-fit:contain; padding:18px; }
-.fda-body{ padding:16px 18px; }
-.fda-top{ display:flex; align-items:center; gap:10px; margin-bottom:9px; }
-.fda-date{ font-size:12px; color:#8a97a4; margin-left:auto; }
-.fda-badge{ font-size:11px; font-weight:700; padding:3px 11px; border-radius:20px; letter-spacing:.3px; }
+.fda-img img{ width:100%; max-height:440px; object-fit:contain; padding:24px; }   /* 사진 크게 */
+.fda-body{ padding:18px 22px 20px; }
+.fda-top{ display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+.fda-date{ font-size:12.5px; color:#8a97a4; margin-left:auto; }
+.fda-badge{ font-size:11.5px; font-weight:700; padding:4px 12px; border-radius:20px; letter-spacing:.3px; }
 .fda-badge.ea{ background:#fff4d6; color:#9a6700; border:1px solid #f0d98a; }
 .fda-badge.recall{ background:#fde2e4; color:#a32330; border:1px solid #f3c0c5; }
-.fda-title{ font-family:"Newsreader",serif; font-size:18px; font-weight:600; line-height:1.35; color:#1d2b3a; margin-bottom:9px; }
-.fda-badges{ margin-bottom:9px; }
-.fda-reason{ font-size:13.5px; line-height:1.7; color:#46535f; }
-.fda-detail{ margin-top:11px; padding-top:11px; border-top:1px dashed #dde4ea; }
-.fda-detail .detail-field{ font-size:13px; line-height:1.6; color:#3a4550; margin:4px 0; }
+.fda-title{ font-family:"Newsreader",serif; font-size:20px; font-weight:600; line-height:1.35; color:#1d2b3a; margin-bottom:10px; }
+.fda-badges{ margin-bottom:10px; }
+.fda-reason{ font-size:14px; line-height:1.7; color:#46535f; }
+.fda-detail{ margin-top:13px; padding-top:13px; border-top:1px dashed #dde4ea; }
+.fda-detail .detail-field{ font-size:13.5px; line-height:1.6; color:#3a4550; margin:5px 0; }
 .fda-detail .detail-field b{ color:#2F4F6F; }
-.fda-detail .detail-link{ color:#b5384a; text-decoration:none; border-bottom:1px solid currentColor; font-size:12.5px; }
-.fda-more{ margin-top:11px; background:none; border:none; padding:0; cursor:pointer; font-size:12.5px; color:#2F4F6F; font-weight:600; }
+.fda-detail .detail-link{ color:#b5384a; text-decoration:none; border-bottom:1px solid currentColor; font-size:13px; }
+.fda-more{ margin-top:12px; background:none; border:none; padding:0; cursor:pointer; font-size:13px; color:#2F4F6F; font-weight:600; }
 .fda-more:hover{ color:#b5384a; }
 @media (max-width:600px){
-  .feed{ grid-template-columns:1fr; }
-  .fda-img img{ max-height:300px; }
+  .fda-img img{ max-height:360px; padding:14px; }
+  .fda-title{ font-size:18px; }
 }
 }
