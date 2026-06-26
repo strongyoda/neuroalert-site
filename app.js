@@ -194,7 +194,6 @@ function render(){
         classHtml += '<span class="class-badge rsn">'+esc(classLabel(e.reason_type))+'</span>';
 
       const reason = esc(e.reason||"");
-      const reasonShort = reason.length > 200 ? reason.slice(0,200)+"…" : reason;
 
       card.innerHTML =
         imgHtml +
@@ -202,7 +201,7 @@ function render(){
           '<div class="fda-top">'+badge+'<span class="fda-date">'+fmtDate(e.event_date)+'</span></div>'+
           '<div class="fda-title">'+esc(e.device_name||"—")+'</div>'+
           (classHtml?'<div class="fda-badges">'+classHtml+'</div>':'')+
-          '<div class="fda-reason">'+reasonShort+'</div>'+
+          '<div class="fda-reason">'+reason+'</div>'+
           '<div class="fda-detail" hidden>'+
             (e.use_purpose?'<div class="detail-field"><b>'+t("purpose_label")+':</b> '+esc(e.use_purpose)+'</div>':'')+
             (e.action_required?'<div class="detail-field"><b>'+t("action_label")+'</b> '+esc(e.action_required)+'</div>':'')+
