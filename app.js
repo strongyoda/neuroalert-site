@@ -141,11 +141,10 @@ function groupKey(company, device, dateRaw){
     .replace(/^brand name:\s*/i, "")
     .replace(/model\/catalog number.*$/is, "")
     .replace(/catalog number.*$/is, "")
-    .replace(/\b\d+(\.\d+)?\s*(fr|f|mm|cm|m|g|ga|inch|in)\b/g, " ")
-    .replace(/\b\d+\s*x\s*\d+\s*mm\b/gi, " ")
-    .replace(/[\d.,/()×x\-]+/g, " ")
-    .replace(/[^a-z가-힣ぁ-んァ-ン一-龥 ]/g, " ")
-    .replace(/\s+/g, " ").trim().slice(0, 40);
+    .replace(/[^a-z가-힣ぁ-んァ-ン一-龥 ]+/g, " ")     // 영문/한글/일문 단어만, 숫자·단위·기호 전부 제거
+    .split(/\s+/)
+    .filter(w => w.length > 1 && !["mm","cm","fr","mx","mmx","ml","cs","otw","rx","lp","cmx","fx","cmmx"].includes(w))  // 단위 잔재 제거
+    .join(" ").trim().slice(0, 40);
   const day = (dateRaw || "").slice(0, 10);
   return (day + "|" + company.toLowerCase().trim() + "|" + d);
 }
