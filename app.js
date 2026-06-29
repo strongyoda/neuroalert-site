@@ -144,7 +144,7 @@ function groupKey(company, device, dateRaw){
     .replace(/\b\d+(\.\d+)?\s*(fr|f|mm|cm|m|g|ga|inch|in)\b/g, " ")
     .replace(/\b\d+\s*x\s*\d+\s*mm\b/gi, " ")
     .replace(/[\d.,/()×x\-]+/g, " ")
-    .replace(/[^a-z가-힣ぁ-んァ-ン一-龥 ]/g, " ")   // 영숫자·한글·일본어·공백만 남김
+    .replace(/[^a-z가-힣ぁ-んァ-ン一-龥 ]/g, " ")
     .replace(/\s+/g, " ").trim().slice(0, 40);
   const day = (dateRaw || "").slice(0, 10);
   return (day + "|" + company.toLowerCase().trim() + "|" + d);
@@ -289,29 +289,20 @@ function render(){
     const detailTr = document.createElement("tr");
     detailTr.className = "detail-row";
     detailTr.hidden = true;
-    let inner = '<td colspan="5"><div class="detail-box">';
-    const detailTr = document.createElement("tr");
-    detailTr.className = "detail-row";
-    detailTr.hidden = true;
-    const rep = g.items[0];  // 대표 (공통 내용)
+    const rep = g.items[0];
     let _reason = (rep.source === "JP") ? jpReason(rep) : rep.reason;
     let _purpose = (rep.source === "JP") ? jpPurpose(rep) : rep.use_purpose;
     const noAction = "별도 안내 없음 (제조사 문의 요망)";
     let inner = '<td colspan="5"><div class="detail-box">';
-
-    // 변형(사이즈/카탈로그) 목록 — 여러 개일 때만
     if(g.items.length > 1){
       inner += '<div class="detail-field"><b>'+t("affected_label")+' ('+g.items.length+')</b></div>';
       inner += '<ul class="variant-list">';
       g.items.forEach(it=>{
-        // 사이즈/카탈로그만 추려서 (기기명에서 핵심만)
-        let label = (it._device||"").replace(/^brand name:\s*/i,"").trim();
+        let label = (it._device||"").replace(/^brand name:\s*/i,"").replace(/\s+/g," ").trim();
         inner += '<li>'+esc(label)+'</li>';
       });
       inner += '</ul>';
     }
-
-    // 공통 내용 한 번만
     if(_reason)  inner += '<div class="detail-field"><b>'+t("reason_label")+':</b> '+esc(_reason)+'</div>';
     if(_purpose) inner += '<div class="detail-field"><b>'+t("purpose_label")+':</b> '+esc(_purpose)+'</div>';
     if(rep.license_no) inner += '<div class="detail-field"><b>'+t("license_label")+':</b> '+esc(rep.license_no)+'</div>';
