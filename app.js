@@ -138,15 +138,16 @@ function splitCompanyDevice(e){
 
 function groupKey(company, device, dateRaw){
   let d = device.toLowerCase()
-    .replace(/^brand name:\s*/i, "")              // "Brand Name:" 접두어 제거
-    .replace(/model\/catalog number.*$/is, "")    // 카탈로그번호 이후 다 제거
+    .replace(/^brand name:\s*/i, "")
+    .replace(/model\/catalog number.*$/is, "")
     .replace(/catalog number.*$/is, "")
-    .replace(/\b\d+(\.\d+)?\s*(fr|f|mm|cm|m|g|ga|inch|in)\b/g, " ")  // 사이즈
-    .replace(/\b\d+\s*x\s*\d+\s*mm\b/gi, " ")      // "8mmx30mm" 형태
-    .replace(/[\d.,/()×x\-]+/g, " ")               // 숫자·기호
+    .replace(/\b\d+(\.\d+)?\s*(fr|f|mm|cm|m|g|ga|inch|in)\b/g, " ")
+    .replace(/\b\d+\s*x\s*\d+\s*mm\b/gi, " ")
+    .replace(/[\d.,/()×x\-]+/g, " ")
+    .replace(/[^a-z가-힣ぁ-んァ-ン一-龥 ]/g, " ")   // 영숫자·한글·일본어·공백만 남김
     .replace(/\s+/g, " ").trim().slice(0, 40);
   const day = (dateRaw || "").slice(0, 10);
-  return (day + "|" + company.toLowerCase() + "|" + d);
+  return (day + "|" + company.toLowerCase().trim() + "|" + d);
 }
 
 function render(){
@@ -289,23 +290,37 @@ function render(){
     detailTr.className = "detail-row";
     detailTr.hidden = true;
     let inner = '<td colspan="5"><div class="detail-box">';
-    g.items.forEach(it=>{
-      inner += '<div class="detail-item">';
-      inner += '<div class="detail-dev">'+(esc(it._device)||"—")+'</div>';
-      let _reason = (it.source === "JP") ? jpReason(it) : it.reason;
-      if(_reason)        inner += '<div class="detail-field"><b>'+t("reason_label")+':</b> '+esc(_reason)+'</div>';
-      let _purpose = (it.source === "JP") ? jpPurpose(it) : it.use_purpose;
-      if(_purpose)       inner += '<div class="detail-field"><b>'+t("purpose_label")+':</b> '+esc(_purpose)+'</div>';
-      if(it.license_no)  inner += '<div class="detail-field"><b>'+t("license_label")+':</b> '+esc(it.license_no)+'</div>';
-      if(it.category)    inner += '<div class="detail-field"><b>'+t("code_label")+':</b> <span data-tip="'+esc(codeInfo(it.category))+'">'+esc(it.category)+'</span></div>';
-      const noAction = "별도 안내 없음 (제조사 문의 요망)";
-      if(it.action_required && it.action_required !== noAction && it.source !== "JP")
-        inner += '<div class="detail-field"><b>'+t("action_label")+'</b> '+esc(it.action_required)+'</div>';
-      if(it.detail_url)
-        inner += '<div class="detail-field"><a class="detail-link" href="'+esc(it.detail_url)+'" target="_blank" rel="noopener">'+t("detail_btn")+'</a></div>';
-      inner += '<div class="detail-date">'+fmtDate(it.event_date)+'</div>';
-      inner += '</div>';
-    });
+    const detailTr = document.createElement("tr");
+    detailTr.className = "detail-row";
+    detailTr.hidden = true;
+    const rep = g.items[0];  // 대표 (공통 내용)
+    let _reason = (rep.source === "JP") ? jpReason(rep) : rep.reason;
+    let _purpose = (rep.source === "JP") ? jpPurpose(rep) : rep.use_purpose;
+    const noAction = "별도 안내 없음 (제조사 문의 요망)";
+    let inner = '<td colspan="5"><div class="detail-box">';
+
+    // 변형(사이즈/카탈로그) 목록 — 여러 개일 때만
+    if(g.items.length > 1){
+      inner += '<div class="detail-field"><b>'+t("affected_label")+' ('+g.items.length+')</b></div>';
+      inner += '<ul class="variant-list">';
+      g.items.forEach(it=>{
+        // 사이즈/카탈로그만 추려서 (기기명에서 핵심만)
+        let label = (it._device||"").replace(/^brand name:\s*/i,"").trim();
+        inner += '<li>'+esc(label)+'</li>';
+      });
+      inner += '</ul>';
+    }
+
+    // 공통 내용 한 번만
+    if(_reason)  inner += '<div class="detail-field"><b>'+t("reason_label")+':</b> '+esc(_reason)+'</div>';
+    if(_purpose) inner += '<div class="detail-field"><b>'+t("purpose_label")+':</b> '+esc(_purpose)+'</div>';
+    if(rep.license_no) inner += '<div class="detail-field"><b>'+t("license_label")+':</b> '+esc(rep.license_no)+'</div>';
+    if(rep.category)   inner += '<div class="detail-field"><b>'+t("code_label")+':</b> <span data-tip="'+esc(codeInfo(rep.category))+'">'+esc(rep.category)+'</span></div>';
+    if(rep.action_required && rep.action_required !== noAction && rep.source !== "JP")
+      inner += '<div class="detail-field"><b>'+t("action_label")+'</b> '+esc(rep.action_required)+'</div>';
+    if(rep.detail_url)
+      inner += '<div class="detail-field"><a class="detail-link" href="'+esc(rep.detail_url)+'" target="_blank" rel="noopener">'+t("detail_btn")+'</a></div>';
+    inner += '<div class="detail-date">'+fmtDate(rep.event_date)+'</div>';
     inner += '</div></td>';
     detailTr.innerHTML = inner;
     tr.addEventListener("click", ()=>{
