@@ -137,12 +137,16 @@ function splitCompanyDevice(e){
 }
 
 function groupKey(company, device, dateRaw){
-  const root = device.toLowerCase()
-    .replace(/\b\d+(\.\d+)?\s*(fr|f|mm|cm|g|ga|inch|in)\b/g," ")
-    .replace(/[\d.,/()×x]+/g," ")
-    .replace(/\s+/g," ").trim().slice(0,40);
-  const day = (dateRaw||"").slice(0,10);
-  return (day+"|"+company.toLowerCase()+"|"+root);
+  let d = device.toLowerCase()
+    .replace(/^brand name:\s*/i, "")              // "Brand Name:" 접두어 제거
+    .replace(/model\/catalog number.*$/is, "")    // 카탈로그번호 이후 다 제거
+    .replace(/catalog number.*$/is, "")
+    .replace(/\b\d+(\.\d+)?\s*(fr|f|mm|cm|m|g|ga|inch|in)\b/g, " ")  // 사이즈
+    .replace(/\b\d+\s*x\s*\d+\s*mm\b/gi, " ")      // "8mmx30mm" 형태
+    .replace(/[\d.,/()×x\-]+/g, " ")               // 숫자·기호
+    .replace(/\s+/g, " ").trim().slice(0, 40);
+  const day = (dateRaw || "").slice(0, 10);
+  return (day + "|" + company.toLowerCase() + "|" + d);
 }
 
 function render(){
