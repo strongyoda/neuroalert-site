@@ -76,9 +76,10 @@ function renderMemberCard(){
   }
 }
 
-async function toggleMyComments(){
+async function toggleMyComments(forceReload){
   const box = document.getElementById("myCommentsList");
-  if(!box.hidden){ box.hidden=true; return; }
+  if(!box) return;
+  if(!box.hidden && !forceReload){ box.hidden=true; return; }
   box.hidden=false; box.innerHTML = `<p class="muted">${mt("loading","불러오는 중…")}</p>`;
   try{
     const r = await fetch(`${API_BASE}/api/comments/mine`,{headers:authHeaders()});
@@ -95,12 +96,14 @@ async function toggleMyComments(){
   }catch(e){ box.innerHTML=`<p class="muted">오류</p>`; }
 }
 
-// 내 댓글 클릭 → 해당 건으로 (검색창에 키 넣어 필터)
+// 내 댓글 클릭 → 해당 리콜 카드로 스크롤 + 자동 펼침
 function goToRecall(key){
-  // recall_key가 그룹키라 정확매칭 어려우니, 검색으로 유도
-  const si = document.getElementById("searchInput");
-  if(si){ si.value = key.split("|").pop() || key; si.dispatchEvent(new Event("input")); }
-  document.querySelector(".panel")?.scrollIntoView({behavior:"smooth"});
+  if(typeof window.openRecallByKey === "function"){
+    window.openRecallByKey(key);
+    // 내 댓글 목록은 닫아서 화면 정리
+    const box = document.getElementById("myCommentsList");
+    if(box) box.hidden = true;
+  }
 }
 
 // ---------- 모달 ----------
@@ -227,6 +230,8 @@ async function renderComments(container, recallKey){
     if(!confirm(mt("del_confirm","삭제하시겠습니까?"))) return;
     await fetch(`${API_BASE}/api/comments/${b.dataset.id}`,{method:"DELETE",headers:authHeaders()});
     renderComments(container, recallKey);
+    const _mb = document.getElementById("myCommentsList");
+    if(_mb && !_mb.hidden) toggleMyComments(true);
   });
   const send = document.getElementById(`cmtSend_${recallKey}`);
   if(send) send.onclick = async()=>{
@@ -235,7 +240,12 @@ async function renderComments(container, recallKey){
     const r = await fetch(`${API_BASE}/api/comments`,{method:"POST",
       headers:{"Content-Type":"application/json",...authHeaders()},
       body:JSON.stringify({recall_key:recallKey, body})});
-    if(r.ok){ ta.value=""; renderComments(container, recallKey); }
+    if(r.ok){
+      ta.value=""; renderComments(container, recallKey);
+      // 내 댓글 목록이 열려있으면 갱신
+      const box = document.getElementById("myCommentsList");
+      if(box && !box.hidden) toggleMyComments(true);
+    }
     else { const d=await r.json(); alert(d.detail||"오류"); }
   };
 }

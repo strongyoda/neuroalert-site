@@ -273,8 +273,10 @@ function render(){
     if(e0.reason_type && e0.reason_type !== "기타")
       classHtml += '<span class="class-badge rsn">'+esc(classLabel(e0.reason_type))+'</span>';
 
+    const _gkey = groupKey(g.company, g.device, g.items[0].event_date);
     const tr = document.createElement("tr");
     tr.className = "recall-row";
+    tr.dataset.gkey = _gkey;
     tr.innerHTML =
       '<td class="col-src"><span class="src-flag '+src+'">'+(g.source||"—")+'</span></td>'+
       '<td class="col-company">'+(esc(g.company)||"—")+'</td>'+
@@ -312,21 +314,11 @@ function render(){
       inner += '<div class="detail-field"><a class="detail-link" href="'+esc(rep.detail_url)+'" target="_blank" rel="noopener">'+t("detail_btn")+'</a></div>';
     inner += '<div class="detail-date">'+fmtDate(rep.event_date)+'</div>';
     // 댓글 영역 (그룹키 기준)
-    const _ckey = groupKey(g.company, g.device, g.items[0].event_date);
-    inner += '<div class="recall-comments" data-ckey="'+esc(_ckey)+'"></div>';
+    inner += '<div class="recall-comments" data-ckey="'+esc(_gkey)+'"></div>';
     inner += '</div></td>';
     detailTr.innerHTML = inner;
-    tr.addEventListener("click", ()=>{
-      detailTr.hidden = !detailTr.hidden;
-      tr.classList.toggle("expanded", !detailTr.hidden);
-      if(!detailTr.hidden){
-        const cc = detailTr.querySelector(".recall-comments");
-        if(cc && !cc.dataset.loaded && typeof renderComments==="function"){
-          cc.dataset.loaded="1";
-          renderComments(cc, cc.dataset.ckey);
-        }
-      }
-    });
+    tr._detailTr = detailTr;   // 외부에서 펼치기 위해 참조 저장
+    tr.addEventListener("click", ()=> toggleRecallRow(tr));
     frag.appendChild(tr);
     frag.appendChild(detailTr);
   });
@@ -347,6 +339,45 @@ function renderFoot(total){
 }
 
 function resetAndRender(){ VISIBLE = 100; render(); }
+
+// 리콜 행 펼치기/접기 (댓글 로딩 포함)
+function toggleRecallRow(tr, forceOpen){
+  const detailTr = tr._detailTr;
+  if(!detailTr) return;
+  if(forceOpen) detailTr.hidden = false;
+  else detailTr.hidden = !detailTr.hidden;
+  tr.classList.toggle("expanded", !detailTr.hidden);
+  if(!detailTr.hidden){
+    const cc = detailTr.querySelector(".recall-comments");
+    if(cc && !cc.dataset.loaded && typeof renderComments==="function"){
+      cc.dataset.loaded="1";
+      renderComments(cc, cc.dataset.ckey);
+    }
+  }
+}
+
+// 그룹키로 해당 리콜 카드 찾아 펼치고 스크롤 (내 댓글 클릭용)
+// members.js에서 호출. 현재 필터/탭에 없으면 recall 탭+검색초기화 후 재시도.
+window.openRecallByKey = function(gkey, retry){
+  let row = document.querySelector('.recall-row[data-gkey="'+CSS.escape(gkey)+'"]');
+  if(!row){
+    // 안 보이면: 댓글은 리콜에만 다니까 recall 탭으로 전환 + 필터 초기화 후 한 번 더 시도
+    if(!retry){
+      CURRENT_TYPE = "recall"; CURRENT_SRC = "ALL"; SEARCH_Q = "";
+      const si = document.getElementById("searchInput"); if(si) si.value = "";
+      document.querySelectorAll("#typeFilter .chip").forEach(c=>c.classList.toggle("active", c.dataset.type==="recall"));
+      document.querySelectorAll("#sourceFilter .chip").forEach(c=>c.classList.toggle("active", c.dataset.src==="ALL"));
+      VISIBLE = 2000;  // 다 펼쳐서 찾을 수 있게
+      render();
+      setTimeout(()=>window.openRecallByKey(gkey, true), 60);
+    }
+    return;
+  }
+  toggleRecallRow(row, true);
+  row.scrollIntoView({behavior:"smooth", block:"center"});
+  row.classList.add("flash");
+  setTimeout(()=>row.classList.remove("flash"), 1600);
+};
 
 function esc(s){
   if(s==null) return "";
