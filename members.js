@@ -141,7 +141,7 @@ function renderForm(mode){
       ${sel("su_pos", mt("position","직군"), POSITIONS)}
       <input type="text" id="su_company" placeholder="${mt("org_company","소속 기관/회사명 (비공개·인증용)")}">
       <label class="mem-toggle"><input type="checkbox" id="su_notify" checked> <span>${mt("notify_label","새 리콜 이메일 알림 받기")}</span></label>
-      <p class="mem-fine">${mt("signup_fine","표시는 '지역 · 기관유형 · 직군'까지만 공개되며 기관명은 비공개입니다. 개인 이메일로 가입 시 '미인증'으로 표시되며, 재직 증명 제출 시 기관 인증으로 전환됩니다.")}</p>
+      <p class="mem-fine">${mt("signup_fine","표시는 '지역 · 기관유형 · 직군'까지만 공개되며 기관명은 비공개입니다. 기관·회사 이메일로 가입하면 자동으로 '기관 인증'됩니다. 개인 이메일(gmail, naver 등)로 가입하거나 기관 메일이 없는 경우 '미인증'으로 표시되며, CONTACT 페이지의 관리자 이메일로 재직 증명서(재직증명서·사원증·명함 등)를 보내주시면 '기관 인증'으로 전환해 드립니다.")}</p>
       <button class="btn-primary full" id="su_btn">${mt("signup","회원가입")}</button>`;
     document.getElementById("su_btn").onclick = doSignup;
   }
@@ -244,7 +244,7 @@ const MEM_I18N = { ko:{}, en:{
   admin_panel:"Admin", email:"Email", password:"Password", email_inst:"Email (institutional preferred)",
   password_min:"Password (6+ chars)", region:"Region", org_type:"Organization type", position:"Role",
   org_company:"Institution/company (private, for verification)",
-  signup_fine:"Only 'region · org type · role' is shown publicly; your institution name stays private. Personal-email accounts show as 'Unverified' until proof of affiliation is provided.",
+  signup_fine:"Only 'region · org type · role' is shown publicly; your institution name stays private. Institutional/company emails are auto-verified. Personal-email accounts (gmail, etc.) or those without an institutional email show as 'Unverified' — send proof of affiliation (employment certificate, ID badge, business card) to the admin email on the CONTACT page to be upgraded to 'Verified'.",
   fill_all:"Please fill in all fields.", login_fail:"Login failed", conn_fail:"Connection failed",
   need_email_pw:"Email and password are required.", pw_min:"Password must be 6+ characters.",
   signup_fail:"Signup failed", signup_ok:"Signed up! Check your verification email.",

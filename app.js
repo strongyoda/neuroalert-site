@@ -360,38 +360,7 @@ window.onLangChange = function(){
   else if(pill.classList.contains("down")) setConn("down","js_off");
 };
 
-async function subscribe(){
-  const email = document.getElementById("subEmail").value.trim();
-  const msg = document.getElementById("subMsg");
-  if(!email){ showMsg(msg,t("js_sub_empty"),"error"); return; }
-  try{
-    const res = await fetch(`${API_BASE}/api/subscribe`,{
-      method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email})});
-    const data = await res.json();
-    showMsg(msg, data.message || t("js_sub_ok"), "success");
-    document.getElementById("subEmail").value="";
-  }catch(err){ showMsg(msg,t("js_conn_fail"),"error"); }
-}
-async function unsubscribe(){
-  const email = document.getElementById("unsubEmail").value.trim();
-  const msg = document.getElementById("subMsg");
-  if(!email){ showMsg(msg,t("js_unsub_empty"),"error"); return; }
-  try{
-    const res = await fetch(`${API_BASE}/api/unsubscribe`,{
-      method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email})});
-    const data = await res.json();
-    showMsg(msg, data.message || "OK", "success");
-    document.getElementById("unsubEmail").value="";
-  }catch(err){ showMsg(msg,t("js_conn_fail"),"error"); }
-}
-function showMsg(el,text,type){ el.textContent=text; el.className="msg "+type; }
 
-document.getElementById("subBtn").addEventListener("click", subscribe);
-document.getElementById("unsubBtn").addEventListener("click", unsubscribe);
-document.getElementById("refreshBtn").addEventListener("click", loadEvents);
-document.getElementById("unsubToggle").addEventListener("click", ()=>{
-  const box=document.getElementById("unsubBox"); box.hidden=!box.hidden;
-});
 document.getElementById("sourceFilter").addEventListener("click",(e)=>{
   const btn=e.target.closest(".chip"); if(!btn) return;
   document.querySelectorAll("#sourceFilter .chip").forEach(c=>c.classList.remove("active"));
