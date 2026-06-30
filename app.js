@@ -311,11 +311,21 @@ function render(){
     if(rep.detail_url)
       inner += '<div class="detail-field"><a class="detail-link" href="'+esc(rep.detail_url)+'" target="_blank" rel="noopener">'+t("detail_btn")+'</a></div>';
     inner += '<div class="detail-date">'+fmtDate(rep.event_date)+'</div>';
+    // 댓글 영역 (그룹키 기준)
+    const _ckey = groupKey(g.company, g.device, g.items[0].event_date);
+    inner += '<div class="recall-comments" data-ckey="'+esc(_ckey)+'"></div>';
     inner += '</div></td>';
     detailTr.innerHTML = inner;
     tr.addEventListener("click", ()=>{
       detailTr.hidden = !detailTr.hidden;
       tr.classList.toggle("expanded", !detailTr.hidden);
+      if(!detailTr.hidden){
+        const cc = detailTr.querySelector(".recall-comments");
+        if(cc && !cc.dataset.loaded && typeof renderComments==="function"){
+          cc.dataset.loaded="1";
+          renderComments(cc, cc.dataset.ckey);
+        }
+      }
     });
     frag.appendChild(tr);
     frag.appendChild(detailTr);
