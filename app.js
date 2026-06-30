@@ -53,7 +53,7 @@ async function loadEvents(){
     const srcCount = new Set(ALL_EVENTS.map(e=>e.source).filter(Boolean)).size;
     if(srcCount) document.getElementById("statSources").textContent = srcCount;
     const newest = ALL_EVENTS.find(e=>e._date);
-    document.getElementById("statUpdated").textContent = newest ? fmtDate(newest.event_date) : "—";
+    document.getElementById("statUpdated").textContent = data.last_fetch ? fmtDate(data.last_fetch) : (newest ? fmtDate(newest.event_date) : "—");
     render();
   }catch(err){
     setConn("down", "js_off");
