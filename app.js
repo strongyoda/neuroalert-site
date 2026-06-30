@@ -291,8 +291,8 @@ function render(){
     detailTr.className = "detail-row";
     detailTr.hidden = true;
     const rep = g.items[0];
-    let _reason = (rep.source === "JP") ? jpReason(rep) : rep.reason;
-    let _purpose = (rep.source === "JP") ? jpPurpose(rep) : rep.use_purpose;
+    let _reason = jpReason(rep);
+    let _purpose = jpPurpose(rep);
     const noAction = "별도 안내 없음 (제조사 문의 요망)";
     let inner = '<td colspan="5"><div class="detail-box">';
     if(g.items.length > 1){

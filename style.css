@@ -431,6 +431,8 @@ body.lang-ko .class-badge{font-family:"IBM Plex Sans KR",sans-serif}
 
 /* 일본 소스 플래그 색 (기존 us/kr/au/ca 옆에 jp 추가) */
 .src-flag.jp{ background:#7a1f2b; color:#fff; }
+.src-flag.de{ background:#1a1a1a; color:#fff; }
+.src-flag.uk{ background:#1d3a6e; color:#fff; }
 
 .detail-hint{
   display:inline-block; margin-left:8px; font-size:11px; color:#9aa7b4;
