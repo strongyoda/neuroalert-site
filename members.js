@@ -44,8 +44,13 @@ function renderMemberCard(){
     const badge = ME.verified
       ? `<span class="mem-badge verified">${mt("verified","기관 인증")}</span>`
       : `<span class="mem-badge unverified">${mt("unverified","미인증")}</span>`;
-    const confirmWarn = ME.email_confirmed ? "" :
-      `<p class="mem-warn">${mt("confirm_warn","이메일 인증 미완료 — 메일함의 인증 링크를 확인하세요.")}</p>`;
+    // 안내: 도메인은 기관인데 메일확인만 안 한 경우 vs 개인메일
+    let confirmWarn = "";
+    if(!ME.email_confirmed){
+      confirmWarn = `<p class="mem-warn">${mt("confirm_warn","이메일 인증 미완료 — 메일함의 인증 링크를 클릭하면 기관 인증이 완료됩니다.")}</p>`;
+    } else if(!ME.verified && ME.verified_domain===false){
+      confirmWarn = `<p class="mem-warn">${mt("personal_warn","개인 이메일로 가입되어 '미인증' 상태입니다. CONTACT의 관리자 이메일로 재직 증명서를 보내시면 기관 인증으로 전환됩니다.")}</p>`;
+    }
     card.innerHTML = `
       <h3>${mt("member_title","회원")}</h3>
       <div class="mem-me">
