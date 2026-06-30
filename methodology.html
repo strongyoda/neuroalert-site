@@ -47,6 +47,9 @@
 <li><strong>Korea — MFDS.</strong> Medical device recall dataset via the public data portal, enriched with detailed recall reason, consumer action, product name and manufacturer retrieved from the MFDS Medical Device Safety Information (emedi) detail pages and the public Product Information API. Recalls before 2017 may show only administrative fields, as detail pages are not available for older records.</li>
 <li><strong>Australia — TGA.</strong> Database of Recalls, Advisories and Corrective actions (DRAC), filtered to neurovascular devices. Provides manufacturer, product, detailed reason, and hazard class (I/II/III). Refreshed periodically from the TGA export.</li>
 <li><strong>Canada — Health Canada.</strong> Recalls and Safety Alerts open dataset (medical devices), filtered to neurointerventional products. Detailed issue and recommended action are retrieved from each recall's official Health Canada page. Provides product, issue, and recall class (Type I/II/III). Updated automatically (daily open-data feed).</li>
+<li><strong>Japan — PMDA.</strong> Medical device recall records, filtered to neurovascular devices. Product, manufacturer, reason, and date are translated from Japanese. Refreshed periodically.</li>
+<li><strong>Germany — BfArM.</strong> Field safety corrective actions (customer information) for medical devices, filtered to neurovascular products. Reasons are extracted from the official BfArM PDF and translated from German.</li>
+<li><strong>United Kingdom — MHRA.</strong> Weekly Field Safety Notices (FSNs), filtered to neurovascular devices. Manufacturer, device, reason, and recommended action are extracted from each manufacturer's FSN PDF.</li>
 </ul>
 <h2>Device whitelist (inclusion)</h2>
 <p>Rather than keyword matching — which pulls in unrelated products — NeuroAlert filters by regulatory product classification. The U.S. whitelist includes the following FDA product codes:</p>
@@ -71,6 +74,7 @@
 <li><strong>Korea — MFDS Medical Device Safety Information (emedi).</strong> Detailed recall reason and consumer action are reproduced from the MFDS portal with the source clearly indicated and a link to the original page provided for every record. Reproduction is limited to factual recall information, used without distortion, in accordance with permission confirmed with the operating agency.</li>
 <li><strong>Canada — Health Canada Recalls and Safety Alerts.</strong> Reproduced under the Open Government Licence – Canada: accuracy is preserved without altering the substance, the title and author (Health Canada) are indicated, and the original source URL is provided for each record.</li>
 <li><strong>United States — FDA openFDA</strong> and <strong>Australia — TGA</strong> data are used from their respective open/public databases with attribution.</li>
+<li><strong>Japan — PMDA</strong>, <strong>Germany — BfArM</strong>, and <strong>United Kingdom — MHRA</strong> data are reproduced from their public post-market safety publications with attribution and a link to each original notice.</li>
 </ul>
 <p>Each record links back to its official source page. NeuroAlert does not modify the substance of any agency's information; summaries, when shown, preserve the original meaning. To report an inaccuracy, please use the contact page.</p>
 </div>
@@ -84,6 +88,9 @@
 <li><strong>한국 — 식약처(MFDS).</strong> 공공데이터포털의 의료기기 회수 데이터셋에, 의료기기안심책방(emedi) 상세 페이지와 품목정보 공개 API에서 가져온 상세 회수사유·소비자 조치·제품명·제조사를 결합. 2017년 이전 회수는 상세 페이지가 제공되지 않아 행정 정보만 표시될 수 있음.</li>
 <li><strong>호주 — TGA.</strong> 회수·권고·시정조치 데이터베이스(DRAC)를 신경중재 기기로 필터링. 제조사·제품·상세 사유·위험등급(I/II/III) 제공. TGA 내보내기 파일로 주기적 갱신.</li>
 <li><strong>캐나다 — 보건부.</strong> 회수·안전경고 공개 데이터셋(의료기기)을 신경중재 제품으로 필터링. 상세 사유·권고 조치는 각 회수 건의 캐나다 보건부 공식 페이지에서 가져옴. 제품·사유·회수등급(Type I/II/III) 제공. 매일 공개 데이터 갱신.</li>
+<li><strong>일본 — PMDA.</strong> 의료기기 회수 레코드를 신경중재 기기로 필터링. 제품·제조사·사유·날짜는 일본어에서 번역. 주기적 갱신.</li>
+<li><strong>독일 — BfArM.</strong> 의료기기 현장안전조치(고객 안내)를 신경중재 제품으로 필터링. 사유는 공식 BfArM PDF에서 추출해 독일어에서 번역.</li>
+<li><strong>영국 — MHRA.</strong> 주간 현장안전성공지(FSN)를 신경중재 기기로 필터링. 제조사·기기·사유·권고 조치를 각 제조사 FSN PDF에서 추출.</li>
 </ul>
 <h2>기기 화이트리스트(포함 기준)</h2>
 <p>무관한 제품까지 딸려오는 키워드 매칭 대신, NeuroAlert는 규제 제품 분류 기준으로 필터링합니다. 미국 화이트리스트는 다음 FDA 제품코드를 포함합니다:</p>
@@ -108,6 +115,7 @@
 <li><strong>한국 — 식약처 의료기기안심책방(emedi).</strong> 상세 회수사유와 소비자 조치는 식약처 포털의 정보를 출처를 명확히 밝히고 각 건마다 원본 페이지 링크를 제공하여 표시합니다. 사실에 해당하는 회수 정보에 한하여, 내용을 왜곡하지 않고 운영기관에 확인받은 범위 내에서 인용합니다.</li>
 <li><strong>캐나다 — 보건부 회수·안전경고.</strong> 캐나다 정부 공개 라이선스(Open Government Licence – Canada)에 따라, 핵심 내용을 변경하지 않고 정확성을 유지하며, 제목과 작성 기관(Health Canada)을 명시하고 각 건의 원본 URL을 제공합니다.</li>
 <li><strong>미국 — FDA openFDA</strong> 및 <strong>호주 — TGA</strong> 데이터는 각 공개 데이터베이스에서 출처를 밝혀 이용합니다.</li>
+<li><strong>일본 — PMDA</strong>, <strong>독일 — BfArM</strong>, <strong>영국 — MHRA</strong> 데이터는 각 공개 사후감시 공지에서 출처를 밝히고 원본 링크를 제공하여 표시합니다.</li>
 </ul>
 <p>모든 레코드는 공식 출처 페이지로 연결됩니다. NeuroAlert는 어떤 기관 정보의 핵심 내용도 변형하지 않으며, 요약을 표시하는 경우에도 원래 의미를 유지합니다. 부정확한 내용은 연락 페이지를 통해 알려주시기 바랍니다.</p>
 </div></main>
