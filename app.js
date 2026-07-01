@@ -88,6 +88,13 @@ function jpPurpose(e){
   return e.use_purpose || "";
 }
 
+function jpAction(e){
+  const lang = curLang();
+  if(lang === "ko" && e.action_ko) return e.action_ko;
+  if(e.action_en) return e.action_en;
+  return e.action_required || "";
+}
+
 function getFiltered(){
   const wantFda = (CURRENT_TYPE === "fda_alert");
   return ALL_EVENTS.filter(e=>{
@@ -308,8 +315,9 @@ function render(){
     if(_purpose) inner += '<div class="detail-field"><b>'+t("purpose_label")+':</b> '+esc(_purpose)+'</div>';
     if(rep.license_no) inner += '<div class="detail-field"><b>'+t("license_label")+':</b> '+esc(rep.license_no)+'</div>';
     if(rep.category)   inner += '<div class="detail-field"><b>'+t("code_label")+':</b> <span data-tip="'+esc(codeInfo(rep.category))+'">'+esc(rep.category)+'</span></div>';
-    if(rep.action_required && rep.action_required !== noAction && rep.source !== "JP")
-      inner += '<div class="detail-field"><b>'+t("action_label")+'</b> '+esc(rep.action_required)+'</div>';
+    const _act = jpAction(rep);
+    if(_act && _act !== noAction && rep.source !== "JP")
+      inner += '<div class="detail-field"><b>'+t("action_label")+'</b> '+esc(_act)+'</div>';
     if(rep.detail_url)
       inner += '<div class="detail-field"><a class="detail-link" href="'+esc(rep.detail_url)+'" target="_blank" rel="noopener">'+t("detail_btn")+'</a></div>';
     inner += '<div class="detail-date">'+fmtDate(rep.event_date)+'</div>';
