@@ -158,12 +158,31 @@ function groupKey(company, device, dateRaw){
 
 function renderHeroChart(){
   var el=document.getElementById("heroBars"); if(!el) return;
-  var cnt={}; ALL_EVENTS.forEach(function(e){ if(e.neuro_verdict!=="X") cnt[e.source]=(cnt[e.source]||0)+1; });
-  var col={US:"#1c3a5e",KR:"#7a2e3a",AU:"#8a6d1f",CA:"#9c4722",JP:"#4a5a6a",DE:"#3a3a3a",UK:"#1d3a6e"};
-  var ks=Object.keys(cnt).sort(function(a,b){return cnt[b]-cnt[a];});
-  var mx=1; ks.forEach(function(s){ if(cnt[s]>mx) mx=cnt[s]; });
-  var tt=document.getElementById("heroChartTitle"); if(tt) tt.textContent=(typeof curLang==="function"&&curLang()==="ko")?"규제기관별 리콜":"Recalls by regulator";
-  el.innerHTML=ks.map(function(s){return '<div class="hero-bar"><div class="hb-c">'+s+'</div><div class="hb-track"><div class="hb-fill" style="width:'+Math.round(cnt[s]/mx*100)+'%;background:'+(col[s]||"#5b6b7d")+'"></div></div><div class="hb-v">'+cnt[s]+'</div></div>';}).join("");
+  var now=new Date(), months=[];
+  for(var i=17;i>=0;i--){ var dt=new Date(now.getFullYear(),now.getMonth()-i,1); months.push(dt.getFullYear()+"-"+String(dt.getMonth()+1).padStart(2,"0")); }
+  var cnt={}; months.forEach(function(m){cnt[m]=0;});
+  ALL_EVENTS.forEach(function(e){
+    if(e.neuro_verdict==="X") return;
+    var d=parseDate(e.event_date); if(!d) return;
+    var key=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");
+    if(key in cnt) cnt[key]++;
+  });
+  var vals=months.map(function(m){return cnt[m];});
+  var tt=document.getElementById("heroChartTitle"); if(tt) tt.textContent=(typeof curLang==="function"&&curLang()==="ko")?"월별 리콜 신호":"Monthly recall signals";
+  var W=360,H=150,pl=6,pr=6,pt=10,pb=20;
+  var max=Math.max.apply(null,vals), min=Math.min.apply(null,vals); if(max===min) max=min+1;
+  function X(i){return pl+i*(W-pl-pr)/(vals.length-1);}
+  function Y(v){return pt+(1-(v-min)/(max-min))*(H-pt-pb);}
+  var line="M"+vals.map(function(v,i){return X(i).toFixed(1)+" "+Y(v).toFixed(1);}).join(" L");
+  var area=line+" L"+X(vals.length-1).toFixed(1)+" "+(H-pb)+" L"+pl+" "+(H-pb)+" Z";
+  function lab(i){ var p=months[i].split("-"); return "'"+p[0].slice(2)+"."+p[1]; }
+  var ticks=[0,6,12,17].map(function(i){ var anc=i===0?"start":(i===17?"end":"middle"); return '<text x="'+X(i).toFixed(1)+'" y="'+(H-6)+'" font-size="9" fill="#9aa3ad" font-family="IBM Plex Mono,monospace" text-anchor="'+anc+'">'+lab(i)+'</text>'; }).join("");
+  el.innerHTML='<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:auto;display:block;">'+
+    '<defs><linearGradient id="hg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1f6f6f" stop-opacity="0.18"/><stop offset="1" stop-color="#1f6f6f" stop-opacity="0"/></linearGradient></defs>'+
+    '<path d="'+area+'" fill="url(#hg)"/>'+
+    '<path d="'+line+'" fill="none" stroke="#1f6f6f" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>'+
+    '<circle cx="'+X(vals.length-1).toFixed(1)+'" cy="'+Y(vals[vals.length-1]).toFixed(1)+'" r="3.5" fill="#1f6f6f"/>'+
+    ticks+'</svg>';
 }
 
 function render(){
