@@ -430,6 +430,9 @@ document.getElementById("dateClear").addEventListener("click",()=>{
 const _excl = document.getElementById("showExcluded");
 if(_excl) _excl.addEventListener("change",(e)=>{ SHOW_EXCLUDED = e.target.checked; resetAndRender(); });
 
+const _rb = document.getElementById("refreshBtn");
+if(_rb) _rb.addEventListener("click", ()=> loadEvents());
+
 loadEvents();
 
 async function loadCounter(){
