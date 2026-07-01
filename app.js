@@ -156,7 +156,18 @@ function groupKey(company, device, dateRaw){
   return (day + "|" + company.toLowerCase().trim() + "|" + d);
 }
 
+function renderHeroChart(){
+  var el=document.getElementById("heroBars"); if(!el) return;
+  var cnt={}; ALL_EVENTS.forEach(function(e){ if(e.neuro_verdict!=="X") cnt[e.source]=(cnt[e.source]||0)+1; });
+  var col={US:"#1c3a5e",KR:"#7a2e3a",AU:"#8a6d1f",CA:"#9c4722",JP:"#4a5a6a",DE:"#3a3a3a",UK:"#1d3a6e"};
+  var ks=Object.keys(cnt).sort(function(a,b){return cnt[b]-cnt[a];});
+  var mx=1; ks.forEach(function(s){ if(cnt[s]>mx) mx=cnt[s]; });
+  var tt=document.getElementById("heroChartTitle"); if(tt) tt.textContent=(typeof curLang==="function"&&curLang()==="ko")?"규제기관별 리콜":"Recalls by regulator";
+  el.innerHTML=ks.map(function(s){return '<div class="hero-bar"><div class="hb-c">'+s+'</div><div class="hb-track"><div class="hb-fill" style="width:'+Math.round(cnt[s]/mx*100)+'%;background:'+(col[s]||"#5b6b7d")+'"></div></div><div class="hb-v">'+cnt[s]+'</div></div>';}).join("");
+}
+
 function render(){
+  renderHeroChart();
   const body = document.getElementById("eventsBody");
   const feed = document.getElementById("feedBody");
   const tableScroll = document.querySelector(".table-scroll");
@@ -311,16 +322,18 @@ function render(){
       });
       inner += '</ul>';
     }
-    if(_reason)  inner += '<div class="detail-field"><b>'+t("reason_label")+':</b> '+esc(_reason)+'</div>';
-    if(_purpose) inner += '<div class="detail-field"><b>'+t("purpose_label")+':</b> '+esc(_purpose)+'</div>';
-    if(rep.license_no) inner += '<div class="detail-field"><b>'+t("license_label")+':</b> '+esc(rep.license_no)+'</div>';
-    if(rep.category)   inner += '<div class="detail-field"><b>'+t("code_label")+':</b> <span data-tip="'+esc(codeInfo(rep.category))+'">'+esc(rep.category)+'</span></div>';
+    if(_reason)  inner += '<div class="detail-field"><div class="df-lab">'+t("reason_label")+'</div><div class="df-val">'+esc(_reason)+'</div></div>';
+    if(_purpose) inner += '<div class="detail-field"><div class="df-lab">'+t("purpose_label")+'</div><div class="df-val">'+esc(_purpose)+'</div></div>';
     const _act = jpAction(rep);
     if(_act && _act !== noAction && rep.source !== "JP")
-      inner += '<div class="detail-field"><b>'+t("action_label")+'</b> '+esc(_act)+'</div>';
+      inner += '<div class="detail-action"><div class="da-lab">'+t("action_label")+'</div><div class="da-val">'+esc(_act)+'</div></div>';
+    var _meta = [];
+    if(rep.license_no) _meta.push(t("license_label")+' '+esc(rep.license_no));
+    if(rep.category)   _meta.push(t("code_label")+' <span data-tip="'+esc(codeInfo(rep.category))+'">'+esc(rep.category)+'</span>');
+    _meta.push('Updated '+fmtDate(rep.event_date));
+    inner += '<div class="detail-meta">'+_meta.map(function(m){return '<span>'+m+'</span>';}).join('')+'</div>';
     if(rep.detail_url)
       inner += '<div class="detail-field"><a class="detail-link" href="'+esc(rep.detail_url)+'" target="_blank" rel="noopener">'+t("detail_btn")+'</a></div>';
-    inner += '<div class="detail-date">'+fmtDate(rep.event_date)+'</div>';
     // 댓글 영역 (그룹키 기준)
     inner += '<div class="recall-comments" data-ckey="'+esc(_gkey)+'"></div>';
     inner += '</div></td>';
