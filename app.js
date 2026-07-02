@@ -49,11 +49,8 @@ async function loadEvents(){
     });
     setConn("live", "js_live");
     window._totalCount = data.count ?? ALL_EVENTS.length;
-    document.getElementById("statTotal").textContent = window._totalCount.toLocaleString();
-    const srcCount = new Set(ALL_EVENTS.map(e=>e.source).filter(Boolean)).size;
-    if(srcCount) document.getElementById("statSources").textContent = srcCount;
     const newest = ALL_EVENTS.find(e=>e._date);
-    document.getElementById("statUpdated").textContent = data.last_fetch ? fmtDate(data.last_fetch) : (newest ? fmtDate(newest.event_date) : "—");
+    window._lastFetch = data.last_fetch || (newest ? newest.event_date : null);
     render();
   }catch(err){
     setConn("down", "js_off");
@@ -158,33 +155,27 @@ function groupKey(company, device, dateRaw){
 
 function renderHeroChart(){
   var el=document.getElementById("heroBars"); if(!el) return;
-  var now=new Date(), months=[];
-  for(var i=17;i>=0;i--){ var dt=new Date(now.getFullYear(),now.getMonth()-i,1); months.push(dt.getFullYear()+"-"+String(dt.getMonth()+1).padStart(2,"0")); }
-  var cnt={}; months.forEach(function(m){cnt[m]=0;});
-  ALL_EVENTS.forEach(function(e){
-    if(e.neuro_verdict==="X") return;
-    var d=parseDate(e.event_date); if(!d) return;
-    var key=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");
-    if(key in cnt) cnt[key]++;
-  });
-  var vals=months.map(function(m){return cnt[m];});
-  var tt=document.getElementById("heroChartTitle"); if(tt) tt.textContent=(typeof curLang==="function"&&curLang()==="ko")?"월별 리콜 신호":"Monthly recall signals";
-  var W=360,H=150,pl=6,pr=6,pt=10,pb=20;
-  var max=Math.max.apply(null,vals), min=Math.min.apply(null,vals); if(max===min) max=min+1;
-  function X(i){return pl+i*(W-pl-pr)/(vals.length-1);}
-  function Y(v){return pt+(1-(v-min)/(max-min))*(H-pt-pb);}
-  var line="M"+vals.map(function(v,i){return X(i).toFixed(1)+" "+Y(v).toFixed(1);}).join(" L");
-  var area=line+" L"+X(vals.length-1).toFixed(1)+" "+(H-pb)+" L"+pl+" "+(H-pb)+" Z";
-  function lab(i){ var p=months[i].split("-"); return "'"+p[0].slice(2)+"."+p[1]; }
-  var ticks=[0,6,12,17].map(function(i){ var anc=i===0?"start":(i===17?"end":"middle"); return '<text x="'+X(i).toFixed(1)+'" y="'+(H-6)+'" font-size="9" fill="#9aa3ad" font-family="IBM Plex Mono,monospace" text-anchor="'+anc+'">'+lab(i)+'</text>'; }).join("");
-  el.innerHTML='<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:auto;display:block;">'+
-    '<defs><linearGradient id="hg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1f6f6f" stop-opacity="0.18"/><stop offset="1" stop-color="#1f6f6f" stop-opacity="0"/></linearGradient></defs>'+
-    '<path d="'+area+'" fill="url(#hg)"/>'+
-    '<path d="'+line+'" fill="none" stroke="#1f6f6f" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>'+
-    '<circle cx="'+X(vals.length-1).toFixed(1)+'" cy="'+Y(vals[vals.length-1]).toFixed(1)+'" r="3.5" fill="#1f6f6f"/>'+
-    ticks+'</svg>';
+  var evs=ALL_EVENTS.filter(function(e){return e.neuro_verdict!=="X";});
+  var total=(window._totalCount!=null)?window._totalCount:evs.length;
+  var srcs=new Set(ALL_EVENTS.map(function(e){return e.source;}).filter(Boolean)).size;
+  var cut=new Date(); cut.setDate(cut.getDate()-30);
+  var recent=evs.filter(function(e){var d=parseDate(e.event_date);return d&&d>=cut;}).length;
+  var cc={}; evs.forEach(function(e){var c=e.device_category; if(c&&c!=="기타") cc[c]=(cc[c]||0)+1;});
+  var topKey=Object.keys(cc).sort(function(a,b){return cc[b]-cc[a];})[0];
+  var topLabel=topKey?((typeof classLabel==="function")?classLabel(topKey):topKey):"—";
+  var ko=(typeof curLang==="function"&&curLang()==="ko");
+  var lf=(window._lastFetch)?fmtDate(window._lastFetch):"—";
+  var L=ko?{g:"한눈에 보기",a:"신경 관련 리콜",b:"추적 규제기관",c:"최근 30일 신규",d:"최다 리콜 카테고리",e:"매일 갱신 · 최근 동기화"}:{g:"At a glance",a:"Neuro-relevant recalls",b:"Regulators tracked",c:"New in last 30 days",d:"Most-recalled category",e:"Updated daily · last sync"};
+  var tt=document.getElementById("heroChartTitle"); if(tt) tt.textContent=L.g;
+  el.innerHTML=
+    '<div class="hsum-grid">'+
+      '<div><div class="hsum-n">'+total.toLocaleString()+'</div><div class="hsum-l">'+L.a+'</div></div>'+
+      '<div><div class="hsum-n">'+srcs+'</div><div class="hsum-l">'+L.b+'</div></div>'+
+      '<div><div class="hsum-n amber">'+recent+'</div><div class="hsum-l">'+L.c+'</div></div>'+
+      '<div><div class="hsum-cat">'+esc(topLabel)+'</div><div class="hsum-l">'+L.d+'</div></div>'+
+    '</div>'+
+    '<div class="hsum-foot"><span class="hsum-dot"></span>'+L.e+' <b>'+lf+'</b></div>';
 }
-
 function render(){
   renderHeroChart();
   const body = document.getElementById("eventsBody");
