@@ -13,6 +13,7 @@
 .mem-badge{ font-size:10.5px; font-weight:700; padding:2px 8px; border-radius:12px; margin-left:6px; white-space:nowrap; }
 .mem-badge.verified{ background:#e4f3e7; color:#2c7a3f; border:1px solid #bfe3c8; }
 .mem-badge.unverified{ background:#f0f0f0; color:#888; border:1px solid #ddd; }
+.mem-badge.company{ background:#e8eef7; color:#2F4F6F; border:1px solid #c6d4e8; }
 .mem-admin{ font-size:12px; color:#b5384a; text-decoration:none; }
 .mem-warn{ font-size:12px; color:#99502f; background:#fdf3e7; padding:7px 10px; border-radius:6px; margin:8px 0; }
 .mem-toggle{ display:flex; align-items:center; gap:8px; margin:12px 0; font-size:13px; color:#46535f; cursor:pointer; }
@@ -41,6 +42,9 @@
 .mem-msg{ font-size:13px; margin-top:10px; text-align:center; }
 .mem-msg.ok{ color:#2c7a3f; }
 .mem-msg.err{ color:#b5384a; }
+.mem-links{ display:flex; gap:14px; justify-content:center; margin-top:10px; }
+.mem-links .link-btn{ background:none; border:none; font-size:12px; color:#8a97a4; cursor:pointer; text-decoration:underline; }
+.mem-links .link-btn:hover{ color:#2F4F6F; }
 
 /* 댓글 */
 .recall-comments{ margin-top:14px; padding-top:14px; border-top:1px solid #e3e8ee; }
@@ -52,6 +56,8 @@
 .cmt-meta{ display:flex; align-items:center; gap:8px; margin-bottom:5px; flex-wrap:wrap; }
 .cmt-author{ font-size:12.5px; font-weight:600; color:#1d2b3a; }
 .cmt-badge{ font-size:10px; font-weight:700; padding:1px 7px; border-radius:10px; background:#e4f3e7; color:#2c7a3f; border:1px solid #bfe3c8; }
+.cmt-badge.company{ background:#e8eef7; color:#2F4F6F; border:1px solid #c6d4e8; }
+.cmt-item.company{ background:#f4f7fb; border-color:#c6d4e8; }
 .cmt-date{ font-size:11px; color:#9aa7b3; }
 .cmt-del{ margin-left:auto; background:none; border:none; color:#c08; font-size:11px; cursor:pointer; opacity:.6; }
 .cmt-del:hover{ opacity:1; }

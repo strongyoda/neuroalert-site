@@ -41,7 +41,9 @@ function renderMemberCard(){
     document.getElementById("openLogin").onclick = ()=>openModal("login");
     document.getElementById("openSignup").onclick = ()=>openModal("signup");
   } else {
-    const badge = ME.verified
+    const badge = ME.role==="company"
+      ? `<span class="mem-badge company">${mt("company_badge","업체 공식")}</span>`
+      : ME.verified
       ? `<span class="mem-badge verified">${mt("verified","기관 인증")}</span>`
       : `<span class="mem-badge unverified">${mt("unverified","미인증")}</span>`;
     // 안내: 도메인은 기관인데 메일확인만 안 한 경우 vs 개인메일
@@ -136,8 +138,14 @@ function renderForm(mode){
     f.innerHTML = `
       <input type="email" id="li_email" placeholder="${mt("email","이메일")}">
       <input type="password" id="li_pw" placeholder="${mt("password","비밀번호")}">
-      <button class="btn-primary full" id="li_btn">${mt("login","로그인")}</button>`;
+      <button class="btn-primary full" id="li_btn">${mt("login","로그인")}</button>
+      <div class="mem-links">
+        <button class="link-btn" id="li_forgot">${mt("forgot","비밀번호 재설정")}</button>
+        <button class="link-btn" id="li_resend">${mt("resend_confirm","인증메일 재발송")}</button>
+      </div>`;
     document.getElementById("li_btn").onclick = doLogin;
+    document.getElementById("li_forgot").onclick = ()=>doAuthMail("forgot");
+    document.getElementById("li_resend").onclick = ()=>doAuthMail("resend_confirm");
   } else {
     f.innerHTML = `
       <input type="email" id="su_email" placeholder="${mt("email_inst","이메일 (기관 이메일 권장)")}">
@@ -170,6 +178,18 @@ async function doLogin(){
     const d = await r.json();
     if(!r.ok){ msg(d.detail||mt("login_fail","로그인 실패"),true); return; }
     setToken(d.token); ME=d.member; closeModal(); renderMemberCard();
+  }catch(e){ msg(mt("conn_fail","연결 실패"),true); }
+}
+
+// 비밀번호 재설정/인증메일 재발송 요청 (로그인 폼의 이메일 사용)
+async function doAuthMail(kind){
+  const email=document.getElementById("li_email").value.trim();
+  if(!email){ msg(mt("enter_email","위 칸에 이메일을 먼저 입력하세요."),true); return; }
+  try{
+    const r = await fetch(`${API_BASE}/api/auth/${kind}`,{method:"POST",
+      headers:{"Content-Type":"application/json"},body:JSON.stringify({email})});
+    const d = await r.json();
+    msg(d.message||mt("mail_sent","메일함을 확인하세요."), !r.ok);
   }catch(e){ msg(mt("conn_fail","연결 실패"),true); }
 }
 
@@ -206,9 +226,11 @@ async function renderComments(container, recallKey){
   html += `<div class="cmt-list">`;
   if(!list.length) html += `<div class="cmt-empty">${mt("cmt_empty","첫 댓글을 남겨보세요.")}</div>`;
   list.forEach(c=>{
-    const badge = c.verified?`<span class="cmt-badge">${mt("verified","기관 인증")}</span>`:"";
+    const badge = c.role==="company"
+      ? `<span class="cmt-badge company">${mt("company_badge","업체 공식")}</span>`
+      : c.verified?`<span class="cmt-badge">${mt("verified","기관 인증")}</span>`:"";
     const canDel = ME && (ME.id===c.member_id || ME.role==="admin");
-    html += `<div class="cmt-item">
+    html += `<div class="cmt-item${c.role==="company"?" company":""}">
       <div class="cmt-meta"><span class="cmt-author">${esc(c.display_name)}</span>${badge}
         <span class="cmt-date">${esc(c.created_at)}</span>
         ${canDel?`<button class="cmt-del" data-id="${c.id}">${mt("delete","삭제")}</button>`:""}</div>
@@ -263,6 +285,9 @@ const MEM_I18N = { ko:{}, en:{
   fill_all:"Please fill in all fields.", login_fail:"Login failed", conn_fail:"Connection failed",
   need_email_pw:"Email and password are required.", pw_min:"Password must be 6+ characters.",
   signup_fail:"Signup failed", signup_ok:"Signed up! Check your verification email.",
+  forgot:"Reset password", resend_confirm:"Resend confirmation email",
+  enter_email:"Enter your email in the field above first.", mail_sent:"Check your inbox.",
+  company_badge:"Official · Company",
   comments:"Comments", cmt_empty:"Be the first to comment.", cmt_ph:"Share clinical experience or additional info…",
   post:"Post", cmt_login:"Log in to comment.", delete:"Delete", del_confirm:"Delete this?",
   loading:"Loading…", no_comments:"No comments yet."
