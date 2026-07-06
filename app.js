@@ -38,7 +38,7 @@ async function loadEvents(){
   document.getElementById("status").textContent = t("js_loading");
   setConn("", "js_connecting");
   try{
-    const res = await fetch(`${API_BASE}/api/events?limit=2000`);
+    const res = await fetch(`${API_BASE}/api/events?limit=8000`);
     const data = await res.json();
     ALL_EVENTS = (data.events || []).map(e => ({...e, _date: parseDate(e.event_date)}));
     ALL_EVENTS.sort((a,b)=>{

@@ -497,10 +497,10 @@ body.lang-ko .class-badge{font-family:"IBM Plex Sans KR",sans-serif}
 /* ===== expanded detail redesign ===== */
 .detail-field{ margin-bottom:12px; }
 .detail-field .df-lab{ font-size:10px; letter-spacing:1px; color:#8a94a0; font-weight:600; margin-bottom:3px; text-transform:uppercase; }
-.detail-field .df-val{ font-size:13px; line-height:1.6; color:#2b3644; }
+.detail-field .df-val{ font-size:13px; line-height:1.6; color:#2b3644; white-space:pre-line; }
 .detail-action{ background:#faf1e2; border-left:3px solid #9a6a1f; border-radius:0 6px 6px 0; padding:11px 14px; margin:0 0 13px; }
 .detail-action .da-lab{ font-size:10px; letter-spacing:1px; color:#8a5e1a; font-weight:600; margin-bottom:3px; text-transform:uppercase; display:flex; align-items:center; gap:5px; }
-.detail-action .da-val{ font-size:13px; line-height:1.6; color:#5c3f11; }
+.detail-action .da-val{ font-size:13px; line-height:1.6; color:#5c3f11; white-space:pre-line; }
 .detail-meta{ display:flex; flex-wrap:wrap; gap:14px; font-size:11px; color:#9aa3ad; font-family:"IBM Plex Mono",monospace; padding-top:11px; border-top:1px solid #eceae2; margin:4px 0 10px; }
 .detail-meta span{ white-space:nowrap; }
 /* ===== hero country chart ===== */
