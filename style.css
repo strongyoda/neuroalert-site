@@ -165,6 +165,7 @@ table.events{width:100%;border-collapse:collapse;font-size:13.5px;table-layout:f
 .src-flag.de::before{background-image:url("flags/de.svg")}
 .src-flag.uk::before{background-image:url("flags/gb.svg")}
 .src-flag.ch::before{background-image:url("flags/ch.svg")}
+.src-flag.fr::before{background-image:url("flags/fr.svg")}
 
 /* ---------- sidebar cards ---------- */
 .sidebar{display:flex;flex-direction:column;gap:20px;position:sticky;top:74px}
