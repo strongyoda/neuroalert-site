@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>NeuroAlert — Global Neurovascular Device Safety Monitor</title>
-<meta name="description" content="NeuroAlert aggregates neurovascular medical device recall and safety signals from the US FDA, Korea MFDS, Australia TGA, Health Canada, Japan PMDA, Germany BfArM, UK MHRA, Swissmedic, and France ANSM into a single monitoring dashboard for clinicians.">
+<meta name="description" content="NeuroAlert aggregates neurovascular medical device recall and safety signals from the US FDA, Korea MFDS, Australia TGA, Health Canada, Japan PMDA, Germany BfArM, UK MHRA, Swissmedic, France ANSM, and Netherlands IGJ into a single monitoring dashboard for clinicians.">
 <!-- ===== Google AdSense: paste verification/script here after approval ===== -->
 <!-- <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script> -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -49,7 +49,7 @@
     <div class="hero-copy">
     <div class="hero-eyebrow" data-i18n="hero_eyebrow">REGULATORY SIGNAL MONITOR</div>
     <h1 data-i18n="hero_title">Global Neurovascular Device<br>Safety Surveillance</h1>
-    <p class="hero-sub" data-i18n="hero_sub">Consolidated recall and adverse-event signals for neurointerventional devices — drawn from the public post-market databases of nine regulators: U.S. FDA, Korea MFDS, Australia TGA, Health Canada, Japan PMDA, Germany BfArM, UK MHRA, Swissmedic, and France ANSM.</p>
+    <p class="hero-sub" data-i18n="hero_sub">Consolidated recall and adverse-event signals for neurointerventional devices — drawn from the public post-market databases of ten regulators: U.S. FDA, Korea MFDS, Australia TGA, Health Canada, Japan PMDA, Germany BfArM, UK MHRA, Swissmedic, France ANSM, and Netherlands IGJ.</p>
     </div>
     <div class="hero-chart"><div class="hc-head" id="heroChartTitle">Recalls by regulator</div><div id="heroBars"></div></div>
   </div>
@@ -85,6 +85,7 @@
           <button data-src="UK" class="chip">UK&nbsp;MHRA</button>
           <button data-src="CH" class="chip">CH&nbsp;Swissmedic</button>
           <button data-src="FR" class="chip">FR&nbsp;ANSM</button>
+          <button data-src="NL" class="chip">NL&nbsp;IGJ</button>
         </div>
         <button id="refreshBtn" class="btn-ghost" title="Refresh">
           <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M13 8a5 5 0 1 1-1.5-3.5M13 2v3h-3" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="square"/></svg>
@@ -150,6 +151,7 @@
         <li><span class="src-flag uk">UK</span> <span data-i18n="src_uk">MHRA — Field Safety Notices</span></li>
         <li><span class="src-flag ch">CH</span> <span data-i18n="src_ch">Swissmedic — FSCA / Recalls</span></li>
         <li><span class="src-flag fr">FR</span> <span data-i18n="src_fr">ANSM — Safety Information</span></li>
+        <li><span class="src-flag nl">NL</span> <span data-i18n="src_nl">IGJ — Manufacturer FSCA Warnings</span></li>
       </ul>
       <a href="methodology.html" class="link-btn" data-i18n="src_more">How signals are filtered →</a>
     </div>
@@ -167,6 +169,7 @@
         <li><span class="src-flag uk">UK</span> <span data-i18n="cov_uk">Field safety notices with manufacturer, device, reason, and action (from FSN PDF).</span></li>
         <li><span class="src-flag ch">CH</span> <span data-i18n="cov_ch">Field safety corrective actions with manufacturer, device, and date; reason extracted from official FSN PDF.</span></li>
         <li><span class="src-flag fr">FR</span> <span data-i18n="cov_fr">Safety information (recalls, user information) with manufacturer, device, and date; reason extracted from official FSN PDF (translated from French).</span></li>
+        <li><span class="src-flag nl">NL</span> <span data-i18n="cov_nl">Manufacturer field safety corrective actions with device and date; reason taken from the notice text or FSN PDF.</span></li>
         <li><span class="src-flag us">US</span> <span data-i18n="cov_ea">FDA Alerts: curated most-serious recalls &amp; early alerts with images (CDRH).</span></li>
       </ul>
     </div>
@@ -218,6 +221,7 @@
         <a href="https://www.gov.uk/drug-device-alerts" target="_blank" rel="noopener">MHRA</a>
         <a href="https://fsca.swissmedic.ch/mep/" target="_blank" rel="noopener">Swissmedic</a>
         <a href="https://ansm.sante.fr/informations-de-securite/" target="_blank" rel="noopener">ANSM</a>
+        <a href="https://www.igj.nl/onderwerpen/medische-hulpmiddelen/waarschuwingen-medische-hulpmiddelen" target="_blank" rel="noopener">IGJ</a>
       </div>
     </div>
   </div>
