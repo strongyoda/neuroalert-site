@@ -345,7 +345,9 @@ function render(){
     if(rep.detail_url)
       inner += '<div class="detail-field"><a class="detail-link" href="'+esc(rep.detail_url)+'" target="_blank" rel="noopener">'+t("detail_btn")+'</a></div>';
     // 댓글 영역 (그룹키 기준)
-    inner += '<div class="recall-comments" data-ckey="'+esc(_gkey)+'"></div>';
+    // data-match: 이 리콜의 제조사+기기명(소문자) — 업체 계정의 company_match와 대조해 "자사 건" 판정
+    var _matchHay = ((rep.manufacturer||'')+' '+(rep.device_name||'')+' '+(g.company||'')+' '+(g.device||'')).toLowerCase();
+    inner += '<div class="recall-comments" data-ckey="'+esc(_gkey)+'" data-match="'+esc(_matchHay)+'"></div>';
     inner += '</div></td>';
     detailTr.innerHTML = inner;
     tr._detailTr = detailTr;   // 외부에서 펼치기 위해 참조 저장
@@ -382,7 +384,7 @@ function toggleRecallRow(tr, forceOpen){
     const cc = detailTr.querySelector(".recall-comments");
     if(cc && !cc.dataset.loaded && typeof renderComments==="function"){
       cc.dataset.loaded="1";
-      renderComments(cc, cc.dataset.ckey);
+      renderComments(cc, cc.dataset.ckey, cc.dataset.match||"");
     }
   }
 }

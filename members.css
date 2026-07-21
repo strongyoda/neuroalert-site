@@ -56,8 +56,13 @@
 .cmt-meta{ display:flex; align-items:center; gap:8px; margin-bottom:5px; flex-wrap:wrap; }
 .cmt-author{ font-size:12.5px; font-weight:600; color:#1d2b3a; }
 .cmt-badge{ font-size:10px; font-weight:700; padding:1px 7px; border-radius:10px; background:#e4f3e7; color:#2c7a3f; border:1px solid #bfe3c8; }
-.cmt-badge.company{ background:#e8eef7; color:#2F4F6F; border:1px solid #c6d4e8; }
-.cmt-item.company{ background:#f4f7fb; border-color:#c6d4e8; }
+/* 업체 관계자(타사 건에 단 댓글): 약한 회청색 표시 */
+.cmt-badge.company{ background:#eef1f5; color:#5a6b7d; border:1px solid #d6dee6; }
+.cmt-item.company{ background:#f7f9fb; border-color:#dce3ea; }
+/* 제조사 공식 답변(자사 건): 강조 — 진한 배지 + 왼쪽 굵은 보더 + 배경 */
+.cmt-badge.official{ background:#2F4F6F; color:#fff; border:1px solid #2F4F6F; }
+.cmt-item.official{ background:#eef3fa; border:1px solid #c6d4e8; border-left:4px solid #2F4F6F; }
+.cmt-item.official .cmt-author{ color:#2F4F6F; font-weight:700; }
 .cmt-date{ font-size:11px; color:#9aa7b3; }
 .cmt-del{ margin-left:auto; background:none; border:none; color:#c08; font-size:11px; cursor:pointer; opacity:.6; }
 .cmt-del:hover{ opacity:1; }

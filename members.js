@@ -215,7 +215,8 @@ async function doSignup(){
 }
 
 // ---------- 댓글 (펼침 상세 안에 삽입) ----------
-async function renderComments(container, recallKey){
+async function renderComments(container, recallKey, matchHay){
+  matchHay = (matchHay||"").toLowerCase();
   container.innerHTML = `<div class="cmt-loading">${mt("loading","불러오는 중…")}</div>`;
   let list=[];
   try{
@@ -226,11 +227,18 @@ async function renderComments(container, recallKey){
   html += `<div class="cmt-list">`;
   if(!list.length) html += `<div class="cmt-empty">${mt("cmt_empty","첫 댓글을 남겨보세요.")}</div>`;
   list.forEach(c=>{
-    const badge = c.role==="company"
-      ? `<span class="cmt-badge company">${mt("company_badge","업체 공식")}</span>`
+    // "제조사 공식 답변": company 계정이고, 그 계정의 알림 키워드(company_match)가
+    //   이 리콜의 제조사·기기명에 매칭될 때만 (= 자사 건에 단 댓글). 타사 건이면 '업체 관계자'.
+    const kws = (c.company_match||"").split(",").map(k=>k.trim()).filter(k=>k.length>1);
+    const isOfficial = c.role==="company" && kws.some(kw=> matchHay.includes(kw));
+    const badge = isOfficial
+      ? `<span class="cmt-badge official">${mt("official_badge","제조사 공식 답변")}</span>`
+      : c.role==="company"
+      ? `<span class="cmt-badge company">${mt("company_comment_badge","업체 관계자")}</span>`
       : c.verified?`<span class="cmt-badge">${mt("verified","기관 인증")}</span>`:"";
+    const cls = isOfficial ? " official" : (c.role==="company" ? " company" : "");
     const canDel = ME && (ME.id===c.member_id || ME.role==="admin");
-    html += `<div class="cmt-item${c.role==="company"?" company":""}">
+    html += `<div class="cmt-item${cls}">
       <div class="cmt-meta"><span class="cmt-author">${esc(c.display_name)}</span>${badge}
         <span class="cmt-date">${esc(c.created_at)}</span>
         ${canDel?`<button class="cmt-del" data-id="${c.id}">${mt("delete","삭제")}</button>`:""}</div>
@@ -288,6 +296,7 @@ const MEM_I18N = { ko:{}, en:{
   forgot:"Reset password", resend_confirm:"Resend confirmation email",
   enter_email:"Enter your email in the field above first.", mail_sent:"Check your inbox.",
   company_badge:"Official · Company",
+  official_badge:"Official Maker Response", company_comment_badge:"Company Staff",
   comments:"Comments", cmt_empty:"Be the first to comment.", cmt_ph:"Share clinical experience or additional info…",
   post:"Post", cmt_login:"Log in to comment.", delete:"Delete", del_confirm:"Delete this?",
   loading:"Loading…", no_comments:"No comments yet."
