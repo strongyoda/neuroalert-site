@@ -199,6 +199,7 @@ function render(){
     const vf = m.verified ? `<span class="badge vf">기관</span>` : `<span class="muted">—</span>`;
     // 관리 버튼: 등급 전환 + 정지/활성 + 인증 토글. 본인은 강등/정지 비활성.
     let btns = "";
+    if(m.role === "company") btns += `<button class="company" onclick="setCompanyMatch(${m.id})">🔔 알림키워드</button>`;
     if(m.role !== "company") btns += `<button class="company" onclick="setRole(${m.id},'company')">업체 지정</button>`;
     if(m.role !== "member")  btns += `<button onclick="setRole(${m.id},'member')">일반</button>`;
     if(m.role !== "admin")   btns += `<button onclick="setRole(${m.id},'admin')">관리자</button>`;
@@ -208,7 +209,10 @@ function render(){
     return `<tr>
       <td>${esc(m.email)}</td>
       <td>${esc(m.display_name)}</td>
-      <td>${esc(m.org_company) || '<span class="muted">—</span>'}</td>
+      <td>${esc(m.org_company) || '<span class="muted">—</span>'}${
+        m.role==="company" && m.company_match
+          ? `<div class="muted" style="font-size:11px;margin-top:2px;">🔔 ${esc(m.company_match)}</div>` : ""
+      }</td>
       <td>${roleBadge}</td>
       <td>${stBadge}</td>
       <td>${vf}</td>
@@ -245,6 +249,16 @@ function setStatus(id, status){
 }
 function setVerified(id, verified){
   update({member_id:id, verified}, "인증 변경");
+}
+function setCompanyMatch(id){
+  const m = MEMBERS.find(x=>x.id===id);
+  const cur = (m && m.company_match) || "";
+  const v = prompt(
+    `${m?m.email:""}\n\n이 업체 계정에 리콜 알림을 보낼 제조사 매칭 키워드를 쉼표로 입력하세요.\n`+
+    `리콜의 제조사명·기기명에 이 키워드가 포함되면 이 계정으로 이메일이 발송됩니다.\n`+
+    `예) stryker, trevo, synchro   (비우면 알림 해제)`, cur);
+  if(v === null) return;
+  update({member_id:id, company_match:v}, "알림 키워드");
 }
 
 init();

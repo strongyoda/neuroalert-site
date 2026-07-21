@@ -165,7 +165,7 @@ function renderHeroChart(){
   var topLabel=topKey?((typeof classLabel==="function")?classLabel(topKey):topKey):"—";
   var ko=(typeof curLang==="function"&&curLang()==="ko");
   var lf=(window._lastFetch)?fmtDate(window._lastFetch):"—";
-  var L=ko?{g:"한눈에 보기",a:"신경 관련 리콜",b:"추적 규제기관",c:"최근 30일 신규",d:"최다 리콜 카테고리",e:"매일 갱신 · 최근 동기화"}:{g:"At a glance",a:"Neuro-relevant recalls",b:"Regulators tracked",c:"New in last 30 days",d:"Most-recalled category",e:"Updated daily · last sync"};
+  var L=ko?{g:"한눈에 보기",a:"리콜·이상사례 신호",b:"추적 규제기관",c:"최근 30일 신규",d:"최다 리콜 카테고리",e:"매일 갱신 · 최근 동기화"}:{g:"At a glance",a:"Recall & event signals",b:"Regulators tracked",c:"New in last 30 days",d:"Most-recalled category",e:"Updated daily · last sync"};
   var tt=document.getElementById("heroChartTitle"); if(tt) tt.textContent=L.g;
   el.innerHTML=
     '<div class="hsum-grid">'+

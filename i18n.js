@@ -7,7 +7,7 @@ const I18N = {
   en: {
     nav_dashboard:"Dashboard", nav_about:"About", nav_method:"Methodology", nav_contact:"Contact",
     hero_eyebrow:"REGULATORY SIGNAL MONITOR",
-    hero_title:"Global Neurovascular Device<br>Safety Surveillance",
+    hero_title:"Global Neurovascular Device <br>Safety Surveillance",
     hero_sub:"Consolidated recall and adverse-event signals for neurointerventional devices — drawn from the public post-market databases of ten regulators: U.S. FDA, Korea MFDS, Australia TGA, Health Canada, Japan PMDA, Germany BfArM, UK MHRA, Swissmedic, France ANSM, and Netherlands IGJ.",
     stat_records:"Tracked records", stat_sources:"Regulators", stat_updated:"Last updated",
     panel_title:"Recent Recall & Safety Events",
@@ -63,7 +63,7 @@ const I18N = {
   ko: {
     nav_dashboard:"대시보드", nav_about:"소개", nav_method:"방법론", nav_contact:"문의",
     hero_eyebrow:"규제 안전성 신호 모니터",
-    hero_title:"글로벌 신경중재 의료기기<br>안전성 모니터링",
+    hero_title:"글로벌 신경중재 의료기기 <br>안전성 모니터링",
     hero_sub:"신경중재 의료기기의 리콜·이상사례 신호를 미국 FDA, 한국 식약처(MFDS), 호주 TGA, 캐나다 보건부, 일본 PMDA, 독일 BfArM, 영국 MHRA, 스위스 Swissmedic, 프랑스 ANSM, 네덜란드 IGJ — 10개 규제기관의 공개 사후감시 데이터에서 모아 한 화면에 보여줍니다.",
     stat_records:"수집 레코드", stat_sources:"규제기관", stat_updated:"최종 업데이트",
     panel_title:"최근 리콜·안전성 이벤트",
