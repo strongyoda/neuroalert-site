@@ -74,7 +74,7 @@ function renderMemberCard(){
       ME.notify_email = e.target.checked;
     };
     document.getElementById("myComments").onclick = toggleMyComments;
-    document.getElementById("logoutBtn").onclick = ()=>{ setToken(null); ME=null; renderMemberCard(); };
+    document.getElementById("logoutBtn").onclick = ()=>{ setToken(null); ME=null; renderMemberCard(); if(typeof refreshOpenComments==="function") refreshOpenComments(); };
   }
 }
 
@@ -178,6 +178,7 @@ async function doLogin(){
     const d = await r.json();
     if(!r.ok){ msg(d.detail||mt("login_fail","로그인 실패"),true); return; }
     setToken(d.token); ME=d.member; closeModal(); renderMemberCard();
+    if(typeof refreshOpenComments==="function") refreshOpenComments();
   }catch(e){ msg(mt("conn_fail","연결 실패"),true); }
 }
 

@@ -51,6 +51,11 @@ async function loadEvents(){
     window._totalCount = data.count ?? ALL_EVENTS.length;
     const newest = ALL_EVENTS.find(e=>e._date);
     window._lastFetch = data.last_fetch || (newest ? newest.event_date : null);
+    // 제조사 공식 답변이 달린 리콜 키 (목록 배지·테두리용) — 실패해도 목록은 정상
+    try{
+      const ok = await (await fetch(`${API_BASE}/api/official_keys`)).json();
+      window.OFFICIAL_KEYS = new Set(ok.official_keys || []);
+    }catch(e){ window.OFFICIAL_KEYS = new Set(); }
     render();
   }catch(err){
     setConn("down", "js_off");
@@ -302,13 +307,15 @@ function render(){
       classHtml += '<span class="class-badge rsn">'+esc(classLabel(e0.reason_type))+'</span>';
 
     const _gkey = groupKey(g.company, g.device, g.items[0].event_date);
+    const _isOfficial = window.OFFICIAL_KEYS && window.OFFICIAL_KEYS.has(_gkey);
     const tr = document.createElement("tr");
-    tr.className = "recall-row";
+    tr.className = "recall-row" + (_isOfficial ? " has-official" : "");
     tr.dataset.gkey = _gkey;
     tr.innerHTML =
       '<td class="col-src"><span class="src-flag '+src+'">'+(g.source||"—")+'</span></td>'+
       '<td class="col-company">'+(esc(g.company)||"—")+'</td>'+
-      '<td class="col-dev"><div class="dev-name">'+(esc(g.device)||"—")+'</div>'+
+      '<td class="col-dev"><div class="dev-name">'+(esc(g.device)||"—")+
+        (_isOfficial ? ' <span class="official-tag">'+t("js_official")+'</span>' : '')+'</div>'+
         (variantCount>1?'<span class="variant-count">+'+(variantCount-1)+' '+t("js_variant")+'</span>':'')+
         '<span class="detail-hint">'+t("js_detail_hint")+'</span>'+
         '<span class="expand-caret">▾</span></td>'+
@@ -344,6 +351,8 @@ function render(){
     inner += '<div class="detail-meta">'+_meta.map(function(m){return '<span>'+m+'</span>';}).join('')+'</div>';
     if(rep.detail_url)
       inner += '<div class="detail-field"><a class="detail-link" href="'+esc(rep.detail_url)+'" target="_blank" rel="noopener">'+t("detail_btn")+'</a></div>';
+    // 유사 리콜 히스토리 (같은 근본 사건: recall_group) — 다른 나라/시점의 같은 사건을 타임라인으로
+    inner += similarHistoryHtml(rep, _gkey);
     // 댓글 영역 (그룹키 기준)
     // data-match: 이 리콜의 제조사+기기명(소문자) — 업체 계정의 company_match와 대조해 "자사 건" 판정
     var _matchHay = ((rep.manufacturer||'')+' '+(rep.device_name||'')+' '+(g.company||'')+' '+(g.device||'')).toLowerCase();
@@ -373,6 +382,35 @@ function renderFoot(total){
 
 function resetAndRender(){ VISIBLE = 100; render(); }
 
+// 유사 리콜 히스토리 — 같은 recall_group(같은 근본 사건)의 다른 나라/시점 리콜을 타임라인으로
+function similarHistoryHtml(rep, curGkey){
+  if(!rep || !rep.recall_group || typeof ALL_EVENTS === "undefined" || !ALL_EVENTS.length) return "";
+  // 같은 사건 그룹 → 변형(그룹키) 단위로 묶어 대표만, 현재 건 제외
+  const seen = {};
+  ALL_EVENTS.forEach(e=>{
+    if(e.recall_group !== rep.recall_group) return;
+    const cd = splitCompanyDevice(e);
+    const gk = groupKey(cd.company, cd.device, e.event_date);
+    if(gk === curGkey) return;                 // 현재 보고 있는 건 제외
+    if(!seen[gk] || (e._date && seen[gk]._date && e._date < seen[gk]._date)) seen[gk] = e;
+  });
+  const list = Object.values(seen).sort((a,b)=> (a._date&&b._date)? a._date-b._date : 0);
+  if(!list.length) return "";
+  let h = '<div class="similar-hist"><div class="sh-lab">'+t("js_similar")+' <span class="sh-count">'+list.length+'</span></div>';
+  list.forEach(e=>{
+    const src = (e.source||"").toLowerCase();
+    const rsn = jpReason(e);
+    h += '<div class="sh-item">'+
+         '<span class="src-flag '+src+'">'+(e.source||"—")+'</span>'+
+         '<span class="sh-date">'+fmtDate(e._date? e._date.toISOString() : e.event_date)+'</span>'+
+         '<span class="sh-dev">'+esc((splitCompanyDevice(e).device||e.device_name||"").slice(0,60))+'</span>'+
+         (rsn? '<div class="sh-reason">'+esc(rsn.slice(0,110))+'</div>':'')+
+         '</div>';
+  });
+  h += '</div>';
+  return h;
+}
+
 // 리콜 행 펼치기/접기 (댓글 로딩 포함)
 function toggleRecallRow(tr, forceOpen){
   const detailTr = tr._detailTr;
@@ -388,6 +426,16 @@ function toggleRecallRow(tr, forceOpen){
     }
   }
 }
+
+// 로그인/로그아웃 시 이미 펼쳐진 댓글 영역을 다시 그린다
+// (로그인해도 새로고침 전엔 '로그인 필요' 안내가 남아있던 문제 해결)
+window.refreshOpenComments = function(){
+  document.querySelectorAll(".recall-comments").forEach(cc=>{
+    if(cc.dataset.loaded && typeof renderComments==="function"){
+      renderComments(cc, cc.dataset.ckey, cc.dataset.match||"");
+    }
+  });
+};
 
 // 그룹키로 해당 리콜 카드 찾아 펼치고 스크롤 (내 댓글 클릭용)
 // members.js에서 호출. 현재 필터/탭에 없으면 recall 탭+검색초기화 후 재시도.
