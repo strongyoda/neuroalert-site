@@ -400,15 +400,50 @@ function similarHistoryHtml(rep, curGkey){
   list.forEach(e=>{
     const src = (e.source||"").toLowerCase();
     const rsn = jpReason(e);
-    h += '<div class="sh-item">'+
+    // 항목 클릭 → 모달로 전체 내용 (data-rawid로 이벤트 참조)
+    h += '<div class="sh-item" data-rawid="'+esc(e.raw_id||"")+'" title="'+t("js_similar_more")+'">'+
          '<span class="src-flag '+src+'">'+(e.source||"—")+'</span>'+
          '<span class="sh-date">'+fmtDate(e._date? e._date.toISOString() : e.event_date)+'</span>'+
          '<span class="sh-dev">'+esc((splitCompanyDevice(e).device||e.device_name||"").slice(0,60))+'</span>'+
-         (rsn? '<div class="sh-reason">'+esc(rsn.slice(0,110))+'</div>':'')+
+         '<span class="sh-more">'+t("js_similar_more")+'</span>'+
+         (rsn? '<div class="sh-reason">'+esc(rsn.slice(0,110))+(rsn.length>110?'…':'')+'</div>':'')+
          '</div>';
   });
   h += '</div>';
   return h;
+}
+
+// 유사 히스토리 항목 클릭 → 전체 내용 모달
+window.showSimilarDetail = function(rawid){
+  if(typeof ALL_EVENTS === "undefined") return;
+  const e = ALL_EVENTS.find(x=>x.raw_id===rawid);
+  if(!e) return;
+  const cd = splitCompanyDevice(e);
+  const rsn = jpReason(e), act = jpAction(e);
+  const noAction = "별도 안내 없음 (제조사 문의 요망)";
+  const ov = document.createElement("div");
+  ov.className = "sim-overlay";
+  ov.innerHTML =
+    '<div class="sim-modal"><button class="sim-close" aria-label="close">×</button>'+
+    '<div class="sim-head"><span class="src-flag '+(e.source||"").toLowerCase()+'">'+(e.source||"—")+'</span>'+
+      '<span class="sim-date">'+fmtDate(e._date? e._date.toISOString() : e.event_date)+'</span></div>'+
+    '<div class="sim-dev">'+esc(cd.device||e.device_name||"")+'</div>'+
+    (cd.company?'<div class="sim-maker">'+esc(cd.company)+'</div>':'')+
+    (rsn?'<div class="sim-sec"><div class="sim-lab">'+t("reason_label")+'</div><div class="sim-val">'+esc(rsn)+'</div></div>':'')+
+    (act && act!==noAction && e.source!=="JP"?'<div class="sim-sec"><div class="sim-lab">'+t("action_label")+'</div><div class="sim-val">'+esc(act)+'</div></div>':'')+
+    (e.detail_url?'<a class="sim-link" href="'+esc(e.detail_url)+'" target="_blank" rel="noopener">'+t("detail_btn")+'</a>':'')+
+    '</div>';
+  ov.addEventListener("click", ev=>{ if(ev.target===ov || ev.target.closest(".sim-close")) ov.remove(); });
+  document.addEventListener("keydown", function esc2(ev){ if(ev.key==="Escape"){ ov.remove(); document.removeEventListener("keydown", esc2); } });
+  document.body.appendChild(ov);
+};
+// 유사 히스토리 항목 클릭 위임 (한 번만 등록)
+if(!window.__simDelegated){
+  window.__simDelegated = true;
+  document.addEventListener("click", function(ev){
+    const it = ev.target.closest(".sh-item");
+    if(it && it.dataset.rawid){ showSimilarDetail(it.dataset.rawid); }
+  });
 }
 
 // 리콜 행 펼치기/접기 (댓글 로딩 포함)
