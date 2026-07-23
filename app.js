@@ -259,22 +259,53 @@ function render(){
     return;
   }
 
-  // ===== 이상사례 단순 목록 =====
+  // ===== 이상사례 목록 (리콜처럼 클릭 → 상세보기 확장) =====
   if(mode === "events"){
     status.textContent = t("js_showing",{n:list.length.toLocaleString()}) + " · " + t("js_event_note");
     const shown = list.slice(0, VISIBLE);
     const frag = document.createDocumentFragment();
     shown.forEach(e=>{
       const {company, device} = splitCompanyDevice(e);
+      // reason 예: "[Malfunction] Fracture, Premature Separation" → 사건유형/요약 분리
+      let etype = "", summary = (e.reason||"");
+      const m = /^\[([^\]]+)\]\s*([\s\S]*)$/.exec(e.reason||"");
+      if(m){ etype = m[1]; summary = m[2]; }
       const tr = document.createElement("tr");
       tr.className = "ev-row";
       tr.innerHTML =
         '<td class="col-src"><span class="src-flag '+(e.source||"").toLowerCase()+'">'+(e.source||"—")+'</span></td>'+
         '<td class="col-company">'+(esc(company)||"—")+'</td>'+
-        '<td class="col-dev"><div class="dev-name">'+(esc(device)||"—")+'</div></td>'+
-        '<td class="col-class"><span class="reason-text">'+(esc(e.reason)||"—")+'</span></td>'+
+        '<td class="col-dev"><div class="dev-name">'+(esc(device)||"—")+'</div>'+
+          '<span class="detail-hint">'+t("js_detail_hint")+'</span>'+
+          '<span class="expand-caret">▾</span></td>'+
+        '<td class="col-class"><span class="reason-text">'+(esc(summary)||"—")+'</span></td>'+
         '<td class="col-date">'+fmtDate(e.event_date)+'</td>';
+
+      const detailTr = document.createElement("tr");
+      detailTr.className = "detail-row";
+      detailTr.hidden = true;
+      let inner = '<td colspan="5"><div class="detail-box">';
+      if(e.device_problems)
+        inner += '<div class="detail-field"><div class="df-lab">'+t("ev_device_problem")+'</div><div class="df-val">'+esc(e.device_problems)+'</div></div>';
+      if(e.action_required)
+        inner += '<div class="detail-field"><div class="df-lab">'+t("ev_patient_problem")+'</div><div class="df-val">'+esc(e.action_required)+'</div></div>';
+      if(!e.device_problems && !e.action_required && summary)
+        inner += '<div class="detail-field"><div class="df-val">'+esc(summary)+'</div></div>';
+      var _meta = [];
+      if(etype) _meta.push(t("ev_type_label")+' '+esc(etype));
+      if(e.category) _meta.push(t("code_label")+' <span data-tip="'+esc(codeInfo(e.category))+'">'+esc(e.category)+'</span>');
+      const rid = (e.raw_id||"").replace(/^USE-/,"");
+      if(rid) _meta.push(t("ev_report_label")+' '+esc(rid));
+      _meta.push('Updated '+fmtDate(e.event_date));
+      inner += '<div class="detail-meta">'+_meta.map(function(m){return '<span>'+m+'</span>';}).join('')+'</div>';
+      if(e.detail_url)
+        inner += '<div class="detail-field"><a class="detail-link" href="'+esc(e.detail_url)+'" target="_blank" rel="noopener">'+t("ev_fda_link")+'</a></div>';
+      inner += '</div></td>';
+      detailTr.innerHTML = inner;
+      tr._detailTr = detailTr;
+      tr.addEventListener("click", ()=> toggleRecallRow(tr));
       frag.appendChild(tr);
+      frag.appendChild(detailTr);
     });
     body.appendChild(frag);
     renderFoot(list.length);

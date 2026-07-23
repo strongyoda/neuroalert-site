@@ -446,8 +446,12 @@ body.lang-ko .class-badge{font-family:"IBM Plex Sans KR",sans-serif}
 .events .col-company{ max-width:180px; word-break:break-word; }
 .events .col-class{ white-space:normal; }
 
-/* 이상사례 행 (펼침 없음, 커서 기본) */
-.ev-row{ cursor:default; }
+/* 이상사례 행 (리콜처럼 클릭 → 상세보기 펼침) */
+.ev-row{ cursor:pointer; transition:background .12s; }
+.ev-row:hover{ background:rgba(0,0,0,.035); }
+.ev-row.expanded{ background:rgba(47,79,111,.07); }
+.ev-row.expanded .expand-caret{ transform:rotate(180deg); }
+.ev-row:hover .detail-hint{ color:#b5384a; }
 .ev-row .reason-text{ font-size:13px; color:#3a4550; }
 
 /* 소스 칩은 국기 아이콘 방식(.src-flag::before)으로 통일 — 위 정의 참조 */
