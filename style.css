@@ -453,6 +453,10 @@ body.lang-ko .class-badge{font-family:"IBM Plex Sans KR",sans-serif}
 .ev-row.expanded .expand-caret{ transform:rotate(180deg); }
 .ev-row:hover .detail-hint{ color:#b5384a; }
 .ev-row .reason-text{ font-size:13px; color:#3a4550; }
+/* 사건 경위 서술형 원문 — 줄바꿈 보존, 살짝 구분된 박스 */
+.ev-narrative{ white-space:pre-wrap; font-size:12.5px; line-height:1.7; color:#33404c;
+  background:#eef3f7; border-left:3px solid #b9c7d4; border-radius:4px;
+  padding:9px 12px; margin-top:3px; max-height:340px; overflow-y:auto; }
 
 /* 소스 칩은 국기 아이콘 방식(.src-flag::before)으로 통일 — 위 정의 참조 */
 

@@ -291,6 +291,9 @@ function render(){
         inner += '<div class="detail-field"><div class="df-lab">'+t("ev_patient_problem")+'</div><div class="df-val">'+esc(e.action_required)+'</div></div>';
       if(!e.device_problems && !e.action_required && summary)
         inner += '<div class="detail-field"><div class="df-val">'+esc(summary)+'</div></div>';
+      // 사건 경위 — MAUDE 서술형 원문(요약·번역 없이 그대로)
+      if(e.event_narrative)
+        inner += '<div class="detail-field"><div class="df-lab">'+t("ev_narrative")+'</div><div class="df-val ev-narrative">'+esc(e.event_narrative)+'</div></div>';
       var _meta = [];
       if(etype) _meta.push(t("ev_type_label")+' '+esc(etype));
       if(e.category) _meta.push(t("code_label")+' <span data-tip="'+esc(codeInfo(e.category))+'">'+esc(e.category)+'</span>');
