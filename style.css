@@ -457,6 +457,13 @@ body.lang-ko .class-badge{font-family:"IBM Plex Sans KR",sans-serif}
 .ev-narrative{ white-space:pre-wrap; font-size:12.5px; line-height:1.7; color:#33404c;
   background:#eef3f7; border-left:3px solid #b9c7d4; border-radius:4px;
   padding:9px 12px; margin-top:3px; max-height:340px; overflow-y:auto; }
+/* 이상사례 보고 전환 탭 (같은 날 여러 건 보고) */
+.rep-tabs{ display:flex; flex-wrap:wrap; gap:5px; margin:2px 0 10px; }
+.rep-tab{ font-size:12px; padding:3px 11px; border:1px solid #c4d0db; border-radius:14px;
+  background:#fff; color:#48586a; cursor:pointer; transition:all .12s; }
+.rep-tab:hover{ border-color:#2F4F6F; color:#2F4F6F; }
+.rep-tab.active{ background:#2F4F6F; border-color:#2F4F6F; color:#fff; font-weight:600; }
+.rep-panel.hidden{ display:none; }
 
 /* 소스 칩은 국기 아이콘 방식(.src-flag::before)으로 통일 — 위 정의 참조 */
 

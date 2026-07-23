@@ -259,60 +259,75 @@ function render(){
     return;
   }
 
-  // ===== 이상사례 목록 (리콜처럼 클릭 → 상세보기 확장) =====
+  // ===== 이상사례 목록 (제조사+기기+같은날짜로 묶고, 보고 여러 건은 전환 버튼) =====
   if(mode === "events"){
     status.textContent = t("js_showing",{n:list.length.toLocaleString()}) + " · " + t("js_event_note");
-    const shown = list.slice(0, VISIBLE);
-    const frag = document.createDocumentFragment();
-    shown.forEach(e=>{
+    // 같은 사건일에 같은 기기로 여러 번 보고된 건을 한 행으로 묶음 (list는 이미 최신순)
+    const egroups = new Map();
+    list.forEach(e=>{
       const {company, device} = splitCompanyDevice(e);
-      // reason 예: "[Malfunction] Fracture, Premature Separation" → 사건유형/요약 분리
-      let etype = "", summary = (e.reason||"");
-      const m = /^\[([^\]]+)\]\s*([\s\S]*)$/.exec(e.reason||"");
-      if(m){ etype = m[1]; summary = m[2]; }
+      const k = groupKey(company, device, e.event_date);
+      if(!egroups.has(k)) egroups.set(k, {company, device, source:e.source, event_date:e.event_date, items:[]});
+      egroups.get(k).items.push(e);
+    });
+    const egroupList = [...egroups.values()];         // Map 삽입순 = 최신순
+    const shown = egroupList.slice(0, VISIBLE);
+    const frag = document.createDocumentFragment();
+    shown.forEach(g=>{
+      // 보고 순서: report_number(raw_id) 오름차순 = 제조사 보고 1·2·3…
+      g.items.sort((a,b)=> (a.raw_id||"").localeCompare(b.raw_id||""));
+      const n = g.items.length;
+      const e0 = g.items[0];
+      let sum0 = (e0.reason||"");
+      const m0 = /^\[([^\]]+)\]\s*([\s\S]*)$/.exec(e0.reason||"");
+      if(m0){ sum0 = m0[2]; }
+
       const tr = document.createElement("tr");
       tr.className = "ev-row";
       tr.innerHTML =
-        '<td class="col-src"><span class="src-flag '+(e.source||"").toLowerCase()+'">'+(e.source||"—")+'</span></td>'+
-        '<td class="col-company">'+(esc(company)||"—")+'</td>'+
-        '<td class="col-dev"><div class="dev-name">'+(esc(device)||"—")+'</div>'+
+        '<td class="col-src"><span class="src-flag '+(g.source||"").toLowerCase()+'">'+(g.source||"—")+'</span></td>'+
+        '<td class="col-company">'+(esc(g.company)||"—")+'</td>'+
+        '<td class="col-dev"><div class="dev-name">'+(esc(g.device)||"—")+'</div>'+
+          (n>1?'<span class="variant-count">'+n+' '+t("ev_reports")+'</span>':'')+
           '<span class="detail-hint">'+t("js_detail_hint")+'</span>'+
           '<span class="expand-caret">▾</span></td>'+
-        '<td class="col-class"><span class="reason-text">'+(esc(summary)||"—")+'</span></td>'+
-        '<td class="col-date">'+fmtDate(e.event_date)+'</td>';
+        '<td class="col-class"><span class="reason-text">'+(esc(sum0)||"—")+'</span></td>'+
+        '<td class="col-date">'+fmtDate(g.event_date)+'</td>';
 
       const detailTr = document.createElement("tr");
       detailTr.className = "detail-row";
       detailTr.hidden = true;
       let inner = '<td colspan="5"><div class="detail-box">';
-      if(e.device_problems)
-        inner += '<div class="detail-field"><div class="df-lab">'+t("ev_device_problem")+'</div><div class="df-val">'+esc(e.device_problems)+'</div></div>';
-      if(e.action_required)
-        inner += '<div class="detail-field"><div class="df-lab">'+t("ev_patient_problem")+'</div><div class="df-val">'+esc(e.action_required)+'</div></div>';
-      if(!e.device_problems && !e.action_required && summary)
-        inner += '<div class="detail-field"><div class="df-val">'+esc(summary)+'</div></div>';
-      // 사건 경위 — MAUDE 서술형 원문(요약·번역 없이 그대로)
-      if(e.event_narrative)
-        inner += '<div class="detail-field"><div class="df-lab">'+t("ev_narrative")+'</div><div class="df-val ev-narrative">'+esc(e.event_narrative)+'</div></div>';
-      // 제조사 분석 — Additional Manufacturer Narrative 원문
-      if(e.mfr_narrative)
-        inner += '<div class="detail-field"><div class="df-lab">'+t("ev_mfr_narrative")+'</div><div class="df-val ev-narrative">'+esc(e.mfr_narrative)+'</div></div>';
-      var _meta = [];
-      if(etype) _meta.push(t("ev_type_label")+' '+esc(etype));
-      if(e.category) _meta.push(t("code_label")+' <span data-tip="'+esc(codeInfo(e.category))+'">'+esc(e.category)+'</span>');
-      const rid = (e.raw_id||"").replace(/^USE-/,"");
-      if(rid) _meta.push(t("ev_report_label")+' '+esc(rid));
-      _meta.push('Updated '+fmtDate(e.event_date));
-      inner += '<div class="detail-meta">'+_meta.map(function(m){return '<span>'+m+'</span>';}).join('')+'</div>';
+      if(n>1){
+        inner += '<div class="rep-tabs">';
+        g.items.forEach(function(it,i){
+          inner += '<button class="rep-tab'+(i===0?' active':'')+'" data-idx="'+i+'">'+t("ev_report_n",{n:i+1})+'</button>';
+        });
+        inner += '</div>';
+      }
+      g.items.forEach(function(it,i){
+        inner += '<div class="rep-panel'+(i===0?'':' hidden')+'" data-idx="'+i+'">'+ eventReportHtml(it) +'</div>';
+      });
       inner += '</div></td>';
       detailTr.innerHTML = inner;
       tr._detailTr = detailTr;
       tr.addEventListener("click", ()=> toggleRecallRow(tr));
+      if(n>1){
+        // 보고 탭 전환 (행 접힘과 분리)
+        detailTr.addEventListener("click", function(ev){
+          const b = ev.target.closest(".rep-tab");
+          if(!b) return;
+          ev.stopPropagation();
+          const idx = b.dataset.idx;
+          detailTr.querySelectorAll(".rep-tab").forEach(x=> x.classList.toggle("active", x.dataset.idx===idx));
+          detailTr.querySelectorAll(".rep-panel").forEach(x=> x.classList.toggle("hidden", x.dataset.idx!==idx));
+        });
+      }
       frag.appendChild(tr);
       frag.appendChild(detailTr);
     });
     body.appendChild(frag);
-    renderFoot(list.length);
+    renderFoot(egroupList.length);
     return;
   }
 
@@ -401,6 +416,32 @@ function render(){
   });
   body.appendChild(frag);
   renderFoot(groupList.length);
+}
+
+// 이상사례 개별 보고 1건의 상세 HTML (그룹 내 보고 전환 패널에 사용)
+function eventReportHtml(e){
+  let etype = "", summary = (e.reason||"");
+  const m = /^\[([^\]]+)\]\s*([\s\S]*)$/.exec(e.reason||"");
+  if(m){ etype = m[1]; summary = m[2]; }
+  let h = "";
+  if(e.device_problems)
+    h += '<div class="detail-field"><div class="df-lab">'+t("ev_device_problem")+'</div><div class="df-val">'+esc(e.device_problems)+'</div></div>';
+  if(e.action_required)
+    h += '<div class="detail-field"><div class="df-lab">'+t("ev_patient_problem")+'</div><div class="df-val">'+esc(e.action_required)+'</div></div>';
+  if(!e.device_problems && !e.action_required && summary)
+    h += '<div class="detail-field"><div class="df-val">'+esc(summary)+'</div></div>';
+  if(e.event_narrative)
+    h += '<div class="detail-field"><div class="df-lab">'+t("ev_narrative")+'</div><div class="df-val ev-narrative">'+esc(e.event_narrative)+'</div></div>';
+  if(e.mfr_narrative)
+    h += '<div class="detail-field"><div class="df-lab">'+t("ev_mfr_narrative")+'</div><div class="df-val ev-narrative">'+esc(e.mfr_narrative)+'</div></div>';
+  var meta = [];
+  if(etype) meta.push(t("ev_type_label")+' '+esc(etype));
+  if(e.category) meta.push(t("code_label")+' <span data-tip="'+esc(codeInfo(e.category))+'">'+esc(e.category)+'</span>');
+  const rid = (e.raw_id||"").replace(/^USE-/,"");
+  if(rid) meta.push(t("ev_report_label")+' '+esc(rid));
+  meta.push('Updated '+fmtDate(e.event_date));
+  h += '<div class="detail-meta">'+meta.map(function(m){return '<span>'+m+'</span>';}).join('')+'</div>';
+  return h;
 }
 
 function renderFoot(total){
