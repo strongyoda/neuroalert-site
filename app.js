@@ -294,6 +294,9 @@ function render(){
       // 사건 경위 — MAUDE 서술형 원문(요약·번역 없이 그대로)
       if(e.event_narrative)
         inner += '<div class="detail-field"><div class="df-lab">'+t("ev_narrative")+'</div><div class="df-val ev-narrative">'+esc(e.event_narrative)+'</div></div>';
+      // 제조사 분석 — Additional Manufacturer Narrative 원문
+      if(e.mfr_narrative)
+        inner += '<div class="detail-field"><div class="df-lab">'+t("ev_mfr_narrative")+'</div><div class="df-val ev-narrative">'+esc(e.mfr_narrative)+'</div></div>';
       var _meta = [];
       if(etype) _meta.push(t("ev_type_label")+' '+esc(etype));
       if(e.category) _meta.push(t("code_label")+' <span data-tip="'+esc(codeInfo(e.category))+'">'+esc(e.category)+'</span>');
@@ -301,8 +304,6 @@ function render(){
       if(rid) _meta.push(t("ev_report_label")+' '+esc(rid));
       _meta.push('Updated '+fmtDate(e.event_date));
       inner += '<div class="detail-meta">'+_meta.map(function(m){return '<span>'+m+'</span>';}).join('')+'</div>';
-      if(e.detail_url)
-        inner += '<div class="detail-field"><a class="detail-link" href="'+esc(e.detail_url)+'" target="_blank" rel="noopener">'+t("ev_fda_link")+'</a></div>';
       inner += '</div></td>';
       detailTr.innerHTML = inner;
       tr._detailTr = detailTr;
