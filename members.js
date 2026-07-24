@@ -260,7 +260,9 @@ async function renderComments(container, recallKey, matchHay){
   container.querySelectorAll(".cmt-del").forEach(b=> b.onclick=async()=>{
     if(!confirm(mt("del_confirm","삭제하시겠습니까?"))) return;
     await fetch(`${API_BASE}/api/comments/${b.dataset.id}`,{method:"DELETE",headers:authHeaders()});
-    renderComments(container, recallKey);
+    renderComments(container, recallKey, matchHay);
+    // 업체 공식 답변이 삭제되면 목록의 배지도 사라져야 한다
+    if(typeof refreshOfficialKeys==="function") refreshOfficialKeys();
     const _mb = document.getElementById("myCommentsList");
     if(_mb && !_mb.hidden) toggleMyComments(true);
   });
@@ -272,7 +274,9 @@ async function renderComments(container, recallKey, matchHay){
       headers:{"Content-Type":"application/json",...authHeaders()},
       body:JSON.stringify({recall_key:recallKey, body})});
     if(r.ok){
-      ta.value=""; renderComments(container, recallKey);
+      ta.value=""; renderComments(container, recallKey, matchHay);
+      // 업체 공식 답변이 새로 달리면 목록에 배지가 즉시 표시되어야 한다
+      if(typeof refreshOfficialKeys==="function") refreshOfficialKeys();
       // 내 댓글 목록이 열려있으면 갱신
       const box = document.getElementById("myCommentsList");
       if(box && !box.hidden) toggleMyComments(true);

@@ -38,7 +38,7 @@ async function loadEvents(){
   document.getElementById("status").textContent = t("js_loading");
   setConn("", "js_connecting");
   try{
-    const res = await fetch(`${API_BASE}/api/events?limit=8000`);
+    const res = await fetch(`${API_BASE}/api/events?limit=100000`);
     const data = await res.json();
     ALL_EVENTS = (data.events || []).map(e => ({...e, _date: parseDate(e.event_date)}));
     ALL_EVENTS.sort((a,b)=>{
@@ -311,7 +311,13 @@ function render(){
       inner += '</div></td>';
       detailTr.innerHTML = inner;
       tr._detailTr = detailTr;
-      tr.addEventListener("click", ()=> toggleRecallRow(tr));
+      tr.addEventListener("click", ()=>{
+        toggleRecallRow(tr);
+        if(!detailTr.hidden){
+          const act = detailTr.querySelector(".rep-panel:not(.hidden)");
+          if(act) ensureNarrative(act.querySelector(".ev-narr"));
+        }
+      });
       if(n>1){
         // 보고 탭 전환 (행 접힘과 분리)
         detailTr.addEventListener("click", function(ev){
@@ -321,6 +327,8 @@ function render(){
           const idx = b.dataset.idx;
           detailTr.querySelectorAll(".rep-tab").forEach(x=> x.classList.toggle("active", x.dataset.idx===idx));
           detailTr.querySelectorAll(".rep-panel").forEach(x=> x.classList.toggle("hidden", x.dataset.idx!==idx));
+          const act = detailTr.querySelector('.rep-panel[data-idx="'+idx+'"]');
+          if(act) ensureNarrative(act.querySelector(".ev-narr"));
         });
       }
       frag.appendChild(tr);
@@ -430,10 +438,8 @@ function eventReportHtml(e){
     h += '<div class="detail-field"><div class="df-lab">'+t("ev_patient_problem")+'</div><div class="df-val">'+esc(e.action_required)+'</div></div>';
   if(!e.device_problems && !e.action_required && summary)
     h += '<div class="detail-field"><div class="df-val">'+esc(summary)+'</div></div>';
-  if(e.event_narrative)
-    h += '<div class="detail-field"><div class="df-lab">'+t("ev_narrative")+'</div><div class="df-val ev-narrative">'+esc(e.event_narrative)+'</div></div>';
-  if(e.mfr_narrative)
-    h += '<div class="detail-field"><div class="df-lab">'+t("ev_mfr_narrative")+'</div><div class="df-val ev-narrative">'+esc(e.mfr_narrative)+'</div></div>';
+  // 서술형 원문은 용량이 커서 목록에 싣지 않고, 펼칠 때 /api/event_detail로 개별 조회
+  h += '<div class="ev-narr" data-rawid="'+esc(e.raw_id||"")+'"></div>';
   var meta = [];
   if(etype) meta.push(t("ev_type_label")+' '+esc(etype));
   if(e.category) meta.push(t("code_label")+' <span data-tip="'+esc(codeInfo(e.category))+'">'+esc(e.category)+'</span>');
@@ -442,6 +448,26 @@ function eventReportHtml(e){
   meta.push('Updated '+fmtDate(e.event_date));
   h += '<div class="detail-meta">'+meta.map(function(m){return '<span>'+m+'</span>';}).join('')+'</div>';
   return h;
+}
+
+// 이상사례 서술형 원문 지연 로딩 (펼치거나 보고 탭을 열 때 해당 건만 조회)
+async function ensureNarrative(slot){
+  if(!slot || slot.dataset.loaded) return;
+  slot.dataset.loaded = "1";
+  const rid = slot.dataset.rawid;
+  if(!rid) return;
+  slot.innerHTML = '<div class="df-val" style="color:#94a0ab;font-size:12px;">'+t("ev_loading")+'</div>';
+  try{
+    const res = await fetch(`${API_BASE}/api/event_detail/${encodeURIComponent(rid)}`);
+    if(!res.ok) throw new Error("no detail");
+    const d = await res.json();
+    let h = "";
+    if(d.event_narrative)
+      h += '<div class="detail-field"><div class="df-lab">'+t("ev_narrative")+'</div><div class="df-val ev-narrative">'+esc(d.event_narrative)+'</div></div>';
+    if(d.mfr_narrative)
+      h += '<div class="detail-field"><div class="df-lab">'+t("ev_mfr_narrative")+'</div><div class="df-val ev-narrative">'+esc(d.mfr_narrative)+'</div></div>';
+    slot.innerHTML = h;
+  }catch(err){ slot.innerHTML = ""; }
 }
 
 function renderFoot(total){
@@ -537,6 +563,29 @@ function toggleRecallRow(tr, forceOpen){
     }
   }
 }
+
+// 댓글 작성·삭제 후 '제조사 공식 답변' 배지를 다시 계산한다
+// (OFFICIAL_KEYS를 페이지 로드 때만 받아와, 댓글을 지워도 배지가 남아있던 문제 해결)
+window.refreshOfficialKeys = async function(){
+  try{
+    const ok = await (await fetch(`${API_BASE}/api/official_keys`)).json();
+    window.OFFICIAL_KEYS = new Set(ok.official_keys || []);
+  }catch(e){ return; }
+  document.querySelectorAll(".recall-row").forEach(tr=>{
+    const gk = tr.dataset.gkey;
+    const on = !!(gk && window.OFFICIAL_KEYS.has(gk));
+    tr.classList.toggle("has-official", on);
+    const dev = tr.querySelector(".col-dev .dev-name");
+    if(!dev) return;
+    let tag = dev.querySelector(".official-tag");
+    if(on && !tag){
+      tag = document.createElement("span");
+      tag.className = "official-tag";
+      tag.textContent = t("js_official");
+      dev.appendChild(tag);
+    }else if(!on && tag){ tag.remove(); }
+  });
+};
 
 // 로그인/로그아웃 시 이미 펼쳐진 댓글 영역을 다시 그린다
 // (로그인해도 새로고침 전엔 '로그인 필요' 안내가 남아있던 문제 해결)
