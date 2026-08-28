@@ -34,29 +34,47 @@ function setConn(state, key){
 }
 function curLang(){ return (typeof LANG !== "undefined") ? LANG : "en"; }
 
+function _ingestEvents(list, lastFetch){
+  ALL_EVENTS = (list || []).map(e => ({...e, _date: parseDate(e.event_date)}));
+  ALL_EVENTS.sort((a,b)=>{
+    if(a._date && b._date) return b._date - a._date;
+    if(a._date) return -1;
+    if(b._date) return 1;
+    return 0;
+  });
+  const newest = ALL_EVENTS.find(e=>e._date);
+  window._lastFetch = lastFetch || (newest ? newest.event_date : null);
+}
+
 async function loadEvents(){
   document.getElementById("status").textContent = t("js_loading");
   setConn("", "js_connecting");
   try{
-    const res = await fetch(`${API_BASE}/api/events?limit=100000`);
-    const data = await res.json();
-    ALL_EVENTS = (data.events || []).map(e => ({...e, _date: parseDate(e.event_date)}));
-    ALL_EVENTS.sort((a,b)=>{
-      if(a._date && b._date) return b._date - a._date;
-      if(a._date) return -1;
-      if(b._date) return 1;
-      return 0;
-    });
+    // 1차: 첫 화면(리콜 탭·FDA 얼럿)에 필요한 가벼운 데이터만 — 즉시 렌더 (gzip 수 KB)
+    const [r1, r2] = await Promise.all([
+      fetch(`${API_BASE}/api/events?limit=100000&event_type=recall`),
+      fetch(`${API_BASE}/api/events?limit=100000&event_type=early_alert`)
+    ]);
+    const d1 = await r1.json(), d2 = await r2.json();
+    _ingestEvents([...(d1.events || []), ...(d2.events || [])], d1.last_fetch);
+    window._totalCount = null;   // 전체 건수는 전체 로드 후 확정 (그전엔 현재 보유분 표시)
+    window._fullLoaded = false;
     setConn("live", "js_live");
-    window._totalCount = data.count ?? ALL_EVENTS.length;
-    const newest = ALL_EVENTS.find(e=>e._date);
-    window._lastFetch = data.last_fetch || (newest ? newest.event_date : null);
-    // 제조사 공식 답변이 달린 리콜 키 (목록 배지·테두리용) — 실패해도 목록은 정상
-    try{
-      const ok = await (await fetch(`${API_BASE}/api/official_keys`)).json();
-      window.OFFICIAL_KEYS = new Set(ok.official_keys || []);
-    }catch(e){ window.OFFICIAL_KEYS = new Set(); }
     render();
+    // 공식 답변 배지 — 병렬 로드, 도착하면 행에 반영 (실패해도 목록은 정상)
+    fetch(`${API_BASE}/api/official_keys`).then(r=>r.json()).then(ok=>{
+      window.OFFICIAL_KEYS = new Set(ok.official_keys || []);
+      if(typeof refreshOfficialKeys === "function") refreshOfficialKeys();
+    }).catch(()=>{ window.OFFICIAL_KEYS = window.OFFICIAL_KEYS || new Set(); });
+    // 2차: 이상사례 포함 전체를 백그라운드 로드 → 도착 시 통째로 교체
+    fetch(`${API_BASE}/api/events?limit=100000`).then(r=>r.json()).then(data=>{
+      _ingestEvents(data.events || [], data.last_fetch);
+      window._totalCount = data.count ?? ALL_EVENTS.length;
+      window._fullLoaded = true;
+      // 리콜 탭은 1차 데이터로 이미 완전함 — 다른 탭이면 다시 그리고, 통계 타일은 항상 갱신
+      if(CURRENT_TYPE !== "recall") render();
+      else if(typeof renderHeroChart === "function") renderHeroChart();
+    }).catch(()=>{ /* 1차 데이터만으로 계속 동작 (리콜·FDA 얼럿 정상) */ });
   }catch(err){
     setConn("down", "js_off");
     document.getElementById("status").textContent = t("js_offline");
@@ -261,7 +279,8 @@ function render(){
 
   // ===== 이상사례 목록 (제조사+기기+같은날짜로 묶고, 보고 여러 건은 전환 버튼) =====
   if(mode === "events"){
-    status.textContent = t("js_showing",{n:list.length.toLocaleString()}) + " · " + t("js_event_note");
+    status.textContent = t("js_showing",{n:list.length.toLocaleString()}) + " · " + t("js_event_note")
+      + (window._fullLoaded ? "" : " · " + t("js_adv_loading"));
     // 같은 사건일에 같은 기기로 여러 번 보고된 건을 한 행으로 묶음 (list는 이미 최신순)
     const egroups = new Map();
     list.forEach(e=>{
@@ -340,7 +359,8 @@ function render(){
   }
 
   // ===== 리콜 테이블 (묶기 + 펼침) =====
-  status.textContent = t("js_showing",{n:list.length.toLocaleString()}) + " · " + t("js_newest");
+  status.textContent = t("js_showing",{n:list.length.toLocaleString()}) + " · " + t("js_newest")
+    + ((!window._fullLoaded && CURRENT_TYPE === "ALL") ? " · " + t("js_adv_loading") : "");
   const groups = new Map();
   list.forEach(e=>{
     const {company, device} = splitCompanyDevice(e);
