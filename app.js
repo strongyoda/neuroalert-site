@@ -57,7 +57,6 @@ async function loadEvents(){
     ]);
     const d1 = await r1.json(), d2 = await r2.json();
     _ingestEvents([...(d1.events || []), ...(d2.events || [])], d1.last_fetch);
-    window._totalCount = null;   // 전체 건수는 전체 로드 후 확정 (그전엔 현재 보유분 표시)
     window._fullLoaded = false;
     setConn("live", "js_live");
     render();
@@ -69,7 +68,6 @@ async function loadEvents(){
     // 2차: 이상사례 포함 전체를 백그라운드 로드 → 도착 시 통째로 교체
     fetch(`${API_BASE}/api/events?limit=100000`).then(r=>r.json()).then(data=>{
       _ingestEvents(data.events || [], data.last_fetch);
-      window._totalCount = data.count ?? ALL_EVENTS.length;
       window._fullLoaded = true;
       // 리콜 탭은 1차 데이터로 이미 완전함 — 다른 탭이면 다시 그리고, 통계 타일은 항상 갱신
       if(CURRENT_TYPE !== "recall") render();
@@ -179,7 +177,7 @@ function groupKey(company, device, dateRaw){
 function renderHeroChart(){
   var el=document.getElementById("heroBars"); if(!el) return;
   var evs=ALL_EVENTS.filter(function(e){return e.neuro_verdict!=="X";});
-  var total=(window._totalCount!=null)?window._totalCount:evs.length;
+  var total=evs.length;   // X판정 제외 집계 — API의 count는 X 포함이라 부풀려졌음 (2026-10-07 수정)
   var srcs=new Set(ALL_EVENTS.map(function(e){return e.source;}).filter(Boolean)).size;
   var cut=new Date(); cut.setDate(cut.getDate()-30);
   var recent=evs.filter(function(e){var d=parseDate(e.event_date);return d&&d>=cut;}).length;
