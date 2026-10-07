@@ -23,9 +23,13 @@ function parseDate(raw){
   return isNaN(d) ? null : d;
 }
 function fmtDate(raw){
-  const d = parseDate(raw);
-  if(!d) return "—";
-  return d.toISOString().slice(0,10);
+  // Date 객체도 받는다. 현지 시간 기준 연-월-일로 조립한다.
+  // (예전 toISOString은 UTC로 바꿔 한국 등 UTC+ 시간대에서 하루 앞당겨 보였고,
+  //  Date→toISOString→fmtDate 경로는 두 번 밀려 이틀 앞당겨졌음 — 2026-10-07 수정)
+  const d = (raw instanceof Date) ? raw : parseDate(raw);
+  if(!d || isNaN(d)) return "—";
+  const p = n => String(n).padStart(2, "0");
+  return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate());
 }
 function setConn(state, key){
   const pill = document.getElementById("connPill");
@@ -396,7 +400,7 @@ function render(){
         '<span class="detail-hint">'+t("js_detail_hint")+'</span>'+
         '<span class="expand-caret">▾</span></td>'+
       '<td class="col-class">'+(classHtml||"—")+'</td>'+
-      '<td class="col-date">'+fmtDate(g._date ? g._date.toISOString() : e0.event_date)+'</td>';
+      '<td class="col-date">'+fmtDate(g._date || e0.event_date)+'</td>';
 
     const detailTr = document.createElement("tr");
     detailTr.className = "detail-row";
@@ -523,7 +527,7 @@ function similarHistoryHtml(rep, curGkey){
     // 항목 클릭 → 모달로 전체 내용 (data-rawid로 이벤트 참조)
     h += '<div class="sh-item" data-rawid="'+esc(e.raw_id||"")+'" title="'+t("js_similar_more")+'">'+
          '<span class="src-flag '+src+'">'+(e.source||"—")+'</span>'+
-         '<span class="sh-date">'+fmtDate(e._date? e._date.toISOString() : e.event_date)+'</span>'+
+         '<span class="sh-date">'+fmtDate(e._date || e.event_date)+'</span>'+
          '<span class="sh-dev">'+esc((splitCompanyDevice(e).device||e.device_name||"").slice(0,60))+'</span>'+
          '<span class="sh-more">'+t("js_similar_more")+'</span>'+
          (rsn? '<div class="sh-reason">'+esc(rsn.slice(0,110))+(rsn.length>110?'…':'')+'</div>':'')+
@@ -546,7 +550,7 @@ window.showSimilarDetail = function(rawid){
   ov.innerHTML =
     '<div class="sim-modal"><button class="sim-close" aria-label="close">×</button>'+
     '<div class="sim-head"><span class="src-flag '+(e.source||"").toLowerCase()+'">'+(e.source||"—")+'</span>'+
-      '<span class="sim-date">'+fmtDate(e._date? e._date.toISOString() : e.event_date)+'</span></div>'+
+      '<span class="sim-date">'+fmtDate(e._date || e.event_date)+'</span></div>'+
     '<div class="sim-dev">'+esc(cd.device||e.device_name||"")+'</div>'+
     (cd.company?'<div class="sim-maker">'+esc(cd.company)+'</div>':'')+
     (rsn?'<div class="sim-sec"><div class="sim-lab">'+t("reason_label")+'</div><div class="sim-val">'+esc(rsn)+'</div></div>':'')+
