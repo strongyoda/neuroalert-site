@@ -50,6 +50,22 @@ function _ingestEvents(list, lastFetch){
   window._lastFetch = lastFetch || (newest ? newest.event_date : null);
 }
 
+// 외부 링크(NeuroCamp 리콜 위젯 등)의 ?recall=<raw_id> → 그 리콜 줄을 펼치고 스크롤 (첫 로드 때 한 번만)
+let _urlRecallDone = false;
+function openRecallFromUrl(){
+  if(_urlRecallDone) return;
+  _urlRecallDone = true;
+  let rid = null;
+  try{ rid = new URLSearchParams(location.search).get("recall"); }catch(err){ return; }
+  if(!rid) return;
+  const e = ALL_EVENTS.find(x=>x.raw_id===rid);
+  if(!e) return;
+  // 새로고침 때 브라우저가 이전 스크롤 위치를 복원하며 이 스크롤을 덮어쓰지 않게
+  try{ history.scrollRestoration = "manual"; }catch(err){}
+  const cd = splitCompanyDevice(e);
+  window.openRecallByKey(groupKey(cd.company, cd.device, e.event_date));
+}
+
 async function loadEvents(){
   document.getElementById("status").textContent = t("js_loading");
   setConn("", "js_connecting");
@@ -64,6 +80,7 @@ async function loadEvents(){
     window._fullLoaded = false;
     setConn("live", "js_live");
     render();
+    openRecallFromUrl();
     // 공식 답변 배지 — 병렬 로드, 도착하면 행에 반영 (실패해도 목록은 정상)
     fetch(`${API_BASE}/api/official_keys`).then(r=>r.json()).then(ok=>{
       window.OFFICIAL_KEYS = new Set(ok.official_keys || []);
